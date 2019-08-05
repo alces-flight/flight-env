@@ -1,0 +1,4 @@
+:name: easybuild
+:summary: |
+  Software build and installation framework.
+:url: https://easybuilders.github.io/easybuild/

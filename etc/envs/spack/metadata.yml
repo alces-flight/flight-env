@@ -1,0 +1,5 @@
+:name: spack
+:summary: |
+  A flexible package manager that supports multiple versions,
+  configurations, platforms, and compilers.
+:url: https://spack.io/

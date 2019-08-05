@@ -1,0 +1,39 @@
+# =============================================================================
+# Copyright (C) 2019-present Alces Flight Ltd.
+#
+# This file is part of Flight Environment.
+#
+# This program and the accompanying materials are made available under
+# the terms of the Eclipse Public License 2.0 which is available at
+# <https://www.eclipse.org/legal/epl-2.0>, or alternative license
+# terms made available by Alces Flight Ltd - please direct inquiries
+# about licensing to licensing@alces-flight.com.
+#
+# Flight Environment is distributed in the hope that it will be useful, but
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR
+# IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS
+# OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A
+# PARTICULAR PURPOSE. See the Eclipse Public License 2.0 for more
+# details.
+#
+# You should have received a copy of the Eclipse Public License 2.0
+# along with Flight Environment. If not, see:
+#
+#  https://opensource.org/licenses/EPL-2.0
+#
+# For more information on Flight Environment, please visit:
+# https://github.com/alces-flight/flight-env
+# ==============================================================================
+module purge
+
+flight_ENV_vars=(_all_packages _bash_completion_spack DK_NODE _installed_compilers _installed_packages _mirrors module MODULEPATH MODULE_PREFIX need_module _pa_new_path _pa_oldvalue _pa_varname _pretty_print _providers _repos _spack spack _spack_activate _spack_arch _spack_blame _spack_bootstrap _spack_build _spack_buildcache _spack_buildcache_create _spack_buildcache_install _spack_buildcache_keys _spack_buildcache_list _spack_cd _spack_checksum _spack_clean _spack_clone _spack_commands _spack_compiler _spack_compiler_add _spack_compiler_find _spack_compiler_info _spack_compiler_list _spack_compiler_remove _spack_compiler_rm _spack_compilers _spack_config _spack_config_edit _spack_config_get _spack_configure _spack_create _spack_deactivate _spack_debug _spack_debug_create_db_tarball _spack_dependencies _spack_dependents _spack_determine_shell _spack_diy _spack_docs _spack_edit _spack_env _spack_extensions _spack_fetch _spack_find _spack_flake8 _spack_fn_exists _spack_gpg _spack_gpg_create _spack_gpg_export _spack_gpg_init _spack_gpg_list _spack_gpg_sign _spack_gpg_trust _spack_gpg_untrust _spack_gpg_verify _spack_graph _spack_help _spack_info _spack_install _spack_list _spack_load _spack_location _spack_log_parse _spack_mirror _spack_mirror_add _spack_mirror_create _spack_mirror_list _spack_mirror_remove _spack_mirror_rm _spack_module _spack_module_dotkit _spack_module_dotkit_find _spack_module_dotkit_loads _spack_module_dotkit_refresh _spack_module_dotkit_rm _spack_module_lmod _spack_module_lmod_find _spack_module_lmod_loads _spack_module_lmod_refresh _spack_module_lmod_rm _spack_module_lmod_setdefault _spack_module_tcl _spack_module_tcl_find _spack_module_tcl_loads _spack_module_tcl_refresh _spack_module_tcl_rm _spack_patch _spack_pathadd _spack_pkg _spack_pkg_add _spack_pkg_added _spack_pkg_diff _spack_pkg_list _spack_pkg_removed _spack_providers _spack_pydoc _spack_python _spack_reindex _spack_repo _spack_repo_add _spack_repo_create _spack_repo_list _spack_repo_remove _spack_repo_rm _spack_restage SPACK_ROOT _spack_setup SPACK_SHELL _spack_spec _spack_stage _spack_test _spack_uninstall _spack_unload _spack_unuse _spack_url _spack_url_list _spack_url_parse _spack_url_summary _spack_use _spack_versions _spack_view _spack_view_add _spack_view_check _spack_view_hard _spack_view_hardlink _spack_view_remove _spack_view_rm _spack_view_soft _spack_view_statlink _spack_view_status _spack_view_symlink _sp_dotkit_root _sp_lmod_root _sp_module_prefix _sp_prefix _sp_share_dir _sp_source_file _sp_sys_type _sp_tcl_root _subcommands _tests _test_vars)
+for flight_ENV_iter in "${flight_ENV_vars[@]}"; do
+  unset $flight_ENV_iter
+done
+unset flight_ENV_iter flight_ENV_vars
+
+unset flight_ENV_active
+PS1="${flight_ENV_orig_PS1}"
+unset flight_ENV_orig_PS1
+PATH="${flight_ENV_orig_PATH}"
+unset flight_ENV_orig_PATH

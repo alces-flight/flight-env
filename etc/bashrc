@@ -1,0 +1,12 @@
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+  . ~/.bashrc
+fi
+
+export flight_ENV_root=$(cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
+. ${flight_ENV_root}/bin/setup-flenv.sh
+# XXX
+export flight_ROOT=${flight_ROOT:-/opt/flight}
+. ${flight_ROOT}/opt/runway/dist/etc/profile.d/alces-flight.sh
+
+flenv activate ${flight_ENV_shell}
