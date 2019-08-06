@@ -48,7 +48,7 @@ module Env
       end
 
       def default
-        Config.data.fetch(:default_environment)
+        Config.data.fetch(:default_environment).gsub('+','@')
       end
 
       def remove_default
