@@ -24,41 +24,24 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
-require 'env/commands/activate'
-require 'env/commands/deactivate'
-require 'env/commands/create'
-require 'env/commands/describe_type'
-require 'env/commands/list_envs'
-require 'env/commands/list_types'
-require 'env/commands/purge'
-require 'env/commands/set_default'
-require 'env/commands/show_active'
-require 'env/commands/show_default'
-require 'env/commands/switch'
-
 module Env
   module Commands
-    class << self
-      def method_missing(s, *a, &b)
-        if clazz = to_class(s)
-          clazz.new(*a).run!
+    class SetDefault < Command
+      def run
+        if @options.remove
+          if @args.any?
+            raise OptionParser::InvalidArgument, "do not specify environment when removing default"
+          end
+          Environment.remove_default
+          puts "Default environment removed"
         else
-          raise 'command not defined'
+          if @args.empty?
+            raise OptionParser::MissingArgument, "must specify environment when setting default"
+          end
+          type, name = args[0].split('@')
+          e = Environment.set_default(type, name)
+          puts "Default environment set to: #{e}"
         end
-      end
-
-      def respond_to_missing?(s)
-        !!to_class(s)
-      end
-
-      private
-      def to_class(s)
-        s.to_s.split('-').reduce(self) do |clazz, p|
-          p.gsub!(/_(.)/) {|a| a[1].upcase}
-          clazz.const_get(p[0].upcase + p[1..-1])
-        end
-      rescue NameError
-        nil
       end
     end
   end

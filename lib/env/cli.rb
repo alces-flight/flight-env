@@ -116,12 +116,14 @@ module Env
     command :'show-default' do |c|
       cli_syntax(c)
       c.description = "Show the default application environment"
+      c.option '--empty-if-unset', 'Don\'t display output if a default is not set.'
       c.action Commands, :show_default
     end
 
     command :'set-default' do |c|
-      cli_syntax(c)
+      cli_syntax(c, '[NAME]')
       c.description = "Set the default application environment"
+      c.option '--remove', 'Remove the default application environment if it is set.'
       c.action Commands, :set_default
     end
   end

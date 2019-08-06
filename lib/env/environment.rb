@@ -47,6 +47,27 @@ module Env
         end
       end
 
+      def default
+        Config.data.fetch(:default_environment)
+      end
+
+      def remove_default
+        Config.data.delete(:default_environment)
+        Config.save
+      end
+
+      def set_default(type, name = DEFAULT)
+        name ||= DEFAULT
+        e = [type, name].join('+')
+        if all.keys.include?(e.to_sym)
+          Config.data.set(:default_environment, value: e)
+        else
+          raise NoSuchEnvironmentError, "unknown environment: #{[type, name].join('@')}"
+        end
+        Config.save
+        self[e]
+      end
+
       def all
         @envs ||=
           begin

@@ -24,41 +24,17 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
-require 'env/commands/activate'
-require 'env/commands/deactivate'
-require 'env/commands/create'
-require 'env/commands/describe_type'
-require 'env/commands/list_envs'
-require 'env/commands/list_types'
-require 'env/commands/purge'
-require 'env/commands/set_default'
-require 'env/commands/show_active'
-require 'env/commands/show_default'
-require 'env/commands/switch'
+require 'env/environment'
 
 module Env
   module Commands
-    class << self
-      def method_missing(s, *a, &b)
-        if clazz = to_class(s)
-          clazz.new(*a).run!
-        else
-          raise 'command not defined'
+    class ShowDefault < Command
+      def run
+        if d = Environment.default
+          puts d
+        elsif !@options.empty_if_unset
+          puts "(none)"
         end
-      end
-
-      def respond_to_missing?(s)
-        !!to_class(s)
-      end
-
-      private
-      def to_class(s)
-        s.to_s.split('-').reduce(self) do |clazz, p|
-          p.gsub!(/_(.)/) {|a| a[1].upcase}
-          clazz.const_get(p[0].upcase + p[1..-1])
-        end
-      rescue NameError
-        nil
       end
     end
   end
