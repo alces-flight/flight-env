@@ -36,15 +36,17 @@ module Env
         active_env = Environment.active
         if active_env.nil?
           assert_evaluatable
-          activate
+          puts activator
           return
         elsif active_env == args[0] || active_env == [args[0],'default'].join('@')
           raise ActiveEnvironmentError, "environment already active: #{active_env}"
         end
         assert_evaluatable
         type, name = active_env.split('@')
-        puts Type[type].deactivator(*(name))
-        activate
+        deactivation = Type[type].deactivator(*(name))
+        activation = activator
+        puts deactivation
+        puts activation
       end
 
       private
@@ -54,8 +56,8 @@ module Env
         end
       end
 
-      def activate
-        puts Environment[args[0]].activator
+      def activator
+        Environment[args[0]].activator
       end
     end
   end

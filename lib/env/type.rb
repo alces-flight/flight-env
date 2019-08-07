@@ -131,12 +131,12 @@ module Env
 
     def activator(name = DEFAULT, global = false)
       tmpl = ERB.new(File.read(eval_template('activate')))
-      puts tmpl.result(render_binding(name, global))
+      tmpl.result(render_binding(name, global))
     end
 
     def deactivator(name = DEFAULT, global = false)
       tmpl = ERB.new(File.read(eval_template('deactivate')))
-      puts tmpl.result(render_binding(name, global))
+      tmpl.result(render_binding(name, global))
     end
 
     private

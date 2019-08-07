@@ -7,6 +7,6 @@ export flight_ENV_root=$(cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
 . ${flight_ENV_root}/bin/setup-flenv.sh
 
 set -e
-flenv activate ${flight_ENV_env}
+flenv activate ${flight_ENV_subshell}
 set +e
-unset flight_ENV_env
+unset flight_ENV_subshell

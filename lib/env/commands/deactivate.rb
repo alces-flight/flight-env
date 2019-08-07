@@ -39,9 +39,12 @@ module Env
         end
         if ENV['flight_ENV_eval'].nil?
           raise EvaluatorError, 'direct deactivation not possible; try: flenv deactivate'
+        elsif ENV['flight_ENV_subshell']
+          puts 'exit'
+        else
+          type, name = active_env.split('@')
+          puts Type[type].deactivator(*(name))
         end
-        type, name = active_env.split('@')
-        puts Type[type].deactivator(*(name))
       end
     end
   end

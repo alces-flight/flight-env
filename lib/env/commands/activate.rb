@@ -37,6 +37,7 @@ module Env
         unless active_env.nil?
           raise ActiveEnvironmentError, "existing active environment detected: #{active_env}"
         end
+        env = Environment[args[0]]
         if ENV['flight_ENV_eval'].nil?
           if options.subshell
             puts "Activating: #{@args.first}"
@@ -44,8 +45,7 @@ module Env
             Bundler.with_clean_env do
               exec(
                 {
-                  'flight_ENV_env' => @args.first,
-                  'flight_ROOT' => ENV['flight_ROOT']
+                  'flight_ENV_subshell' => @args.first
                 },
                 [shell,'flight-env'],
                 '--rcfile',
@@ -56,7 +56,7 @@ module Env
             raise EvaluatorError, "direct activation not possible; try --subshell, or: flenv activate #{args[0]}"
           end
         end
-        puts Environment[args[0]].activator
+        puts env.activator
       end
     end
   end
