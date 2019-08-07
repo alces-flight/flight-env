@@ -33,31 +33,8 @@ module Env
     class << self
       ENV_DIR_SUFFIX = File.join('flight','env')
 
-      def save
-        FileUtils.mkdir_p(
-          File.join(
-            xdg_config.home,
-            ENV_DIR_SUFFIX
-          )
-        )
-        data.write(force: true)
-      end
-
       def data
         @data ||= TTY::Config.new.tap do |cfg|
-          xdg_config.all.map do |p|
-            File.join(p, ENV_DIR_SUFFIX)
-          end.each(&cfg.method(:append_path))
-          begin
-            cfg.read
-          rescue TTY::Config::ReadError
-            nil
-          end
-        end
-      end
-
-      def global_data
-        @global_data ||= TTY::Config.new.tap do |cfg|
           cfg.append_path(File.join(root, 'etc'))
           begin
             cfg.read
@@ -65,16 +42,6 @@ module Env
             nil
           end
         end
-      end
-
-      def global_save
-        FileUtils.mkdir_p(
-          File.join(
-            root,
-            'etc'
-          )
-        )
-        global_data.write(force: true)
       end
 
       def user_depot_path
@@ -86,14 +53,14 @@ module Env
       end
 
       def global_depot_path
-        @global_depot_path ||= global_data.fetch(
+        @global_depot_path ||= data.fetch(
           :global_depot_path,
           default: '/opt/flight/var/lib/env'
         )
       end
 
       def global_build_cache_path
-        @global_build_cache_path ||= global_data.fetch(
+        @global_build_cache_path ||= data.fetch(
           :global_build_cache_path,
           default: '/opt/flight/var/cache/env/build'
         )
@@ -110,48 +77,6 @@ module Env
 
       def types_path
         @types_path ||= File.join(root, 'etc', 'envs')
-      end
-
-      def environments
-        @environments ||=
-          EnvironmentConfig.new(data.fetch(:environments, default: []),
-                                global_data.fetch(:environments, default: []))
-      end
-
-      class EnvironmentConfig
-        def initialize(environments, global_environments)
-          @environments = environments
-          @global_environments = global_environments
-        end
-
-        def exists?(name, include_global = true)
-          @environments.include?(name) ||
-            @global_environments.include?(name)
-        end
-
-        def <<(env)
-          if env.global?
-            @global_environments << env.to_s
-            Config.global_data.set(:environments, value: @environments)
-            Config.global_save
-          else
-            @environments << env.to_s
-            Config.data.set(:environments, value: @environments)
-            Config.save
-          end
-        end
-
-        def delete(env)
-          if env.global?
-            @global_environments.reject! { |e| e == env.to_s }
-            Config.global_data.set(:environments, value: @environments)
-            Config.global_save
-          else
-            @environments.reject! { |e| e == env.to_s }
-            Config.data.set(:environments, value: @environments)
-            Config.save
-          end
-        end
       end
 
       private
