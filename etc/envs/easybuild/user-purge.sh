@@ -36,13 +36,4 @@ if [ -z "$name" ]; then
   exit 1
 fi
 
-# create build area
-mkdir -p ${flight_ENV_CACHE}/build
-cd ${flight_ENV_CACHE}/build
-
-if [ ! -f Miniconda3-latest-Linux-x86_64.sh ]; then
-  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-fi
-
-mkdir -p ${flight_ENV_ROOT}
-bash Miniconda3-latest-Linux-x86_64.sh -b -p ${flight_ENV_ROOT}/conda+${name}
+rm -rf ${flight_ENV_ROOT}/easybuild+${name}

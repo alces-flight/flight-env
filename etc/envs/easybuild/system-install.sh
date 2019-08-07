@@ -40,9 +40,53 @@ fi
 mkdir -p ${flight_ENV_CACHE}/build
 cd ${flight_ENV_CACHE}/build
 
-if [ ! -f Miniconda3-latest-Linux-x86_64.sh ]; then
-  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+mkdir -p ${flight_ENV_ROOT}
+
+# build LUA
+if [ ! -f lua-5.1.4.9.tar.bz2 ]; then
+  wget https://sourceforge.net/projects/lmod/files/lua-5.1.4.9.tar.bz2
+  tar xjf lua-5.1.4.9.tar.bz2
+  cd lua-5.1.4.9
+  ./configure --with-static=yes --prefix=${flight_ENV_ROOT}/share/lua/5.1.4.9
+  make
+  make install
+  cd ..
+fi
+PATH=${flight_ENV_ROOT}/share/lua/5.1.4.9/bin:$PATH
+
+# build Lmod
+if [ -z "$LMOD_CMD" ]; then
+  # build Tcl
+  if ! which tclsh &>/dev/null; then
+    if [ ! -f tcl8.6.9-src.tar.gz ]; then
+      wget https://prdownloads.sourceforge.net/tcl/tcl8.6.9-src.tar.gz
+      tar xzf tcl8.6.9-src.tar.gz
+      cd tcl8.6.9/unix
+      ./configure --prefix=${flight_ENV_ROOT}/share/tcl/8.6.9
+      make
+      make install
+      ln -s ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh8.6 ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh
+      cd ..
+    fi
+    PATH=${flight_ENV_ROOT}/share/tcl/8.6.9/bin:$PATH
+  fi
+
+  if [ ! -f Lmod-8.1.tar.bz2 ]; then
+    wget https://sourceforge.net/projects/lmod/files/Lmod-8.1.tar.bz2
+    tar xjf Lmod-8.1.tar.bz2
+    cd Lmod-8.1
+    ./configure --prefix=${flight_ENV_ROOT}/share/lmod/8.1 --with-fastTCLInterp=no
+    make install
+    cd ..
+  fi
+
+  # activate `module` command
+  . ${flight_ENV_ROOT}/share/lmod/8.1/lmod/8.1/init/profile
 fi
 
-mkdir -p ${flight_ENV_ROOT}
-bash Miniconda3-latest-Linux-x86_64.sh -b -p ${flight_ENV_ROOT}/conda+${name}
+# Install EasyBuild
+if [ ! -f bootstrap_eb.py ]; then
+  wget https://raw.githubusercontent.com/easybuilders/easybuild-framework/develop/easybuild/scripts/bootstrap_eb.py
+fi
+
+python bootstrap_eb.py ${flight_ENV_ROOT}/easybuild+${name}

@@ -27,8 +27,8 @@
 # ==============================================================================
 set -e
 
-flight_ENV_ROOT=${flight_ENV_ROOT:-$HOME/.local/share/flight/env}
-flight_ENV_CACHE=${flight_ENV_CACHE:-$HOME/.cache/flight/env}
+flight_ENV_ROOT=${flight_ENV_ROOT:-/opt/flight/var/lib/env}
+flight_ENV_CACHE=${flight_ENV_CACHE:-/opt/flight/var/cache/env/build}
 name=$1
 
 if [ -z "$name" ]; then
@@ -40,9 +40,11 @@ fi
 mkdir -p ${flight_ENV_CACHE}/build
 cd ${flight_ENV_CACHE}/build
 
-if [ ! -f Miniconda3-latest-Linux-x86_64.sh ]; then
-  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+if [ ! -f spack-v0.12.1.tar.gz ]; then
+  wget https://github.com/spack/spack/archive/v0.12.1.tar.gz -O spack-v0.12.1.tar.gz
 fi
 
-mkdir -p ${flight_ENV_ROOT}
-bash Miniconda3-latest-Linux-x86_64.sh -b -p ${flight_ENV_ROOT}/conda+${name}
+mkdir -p ${flight_ENV_ROOT}/spack+${name}
+tar -C ${flight_ENV_ROOT}/spack+${name} -xzf spack-v0.12.1.tar.gz --strip-components=1
+cd ${flight_ENV_ROOT}/spack+${name}
+bin/spack bootstrap

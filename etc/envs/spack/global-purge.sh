@@ -27,8 +27,8 @@
 # ==============================================================================
 set -e
 
-flight_ENV_ROOT=${flight_ENV_ROOT:-$HOME/.local/share/flight/env}
-flight_ENV_CACHE=${flight_ENV_CACHE:-$HOME/.cache/flight/env}
+flight_ENV_ROOT=${flight_ENV_ROOT:-/opt/flight/var/lib/env}
+flight_ENV_CACHE=${flight_ENV_CACHE:-/opt/flight/var/cache/env/build}
 name=$1
 
 if [ -z "$name" ]; then
@@ -36,13 +36,4 @@ if [ -z "$name" ]; then
   exit 1
 fi
 
-# create build area
-mkdir -p ${flight_ENV_CACHE}/build
-cd ${flight_ENV_CACHE}/build
-
-if [ ! -f Miniconda3-latest-Linux-x86_64.sh ]; then
-  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-fi
-
-mkdir -p ${flight_ENV_ROOT}
-bash Miniconda3-latest-Linux-x86_64.sh -b -p ${flight_ENV_ROOT}/conda+${name}
+rm -rf ${flight_ENV_ROOT}/spack+${name}
