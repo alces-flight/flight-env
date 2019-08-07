@@ -96,11 +96,11 @@ module Env
       c.action Commands, :purge
     end
 
-    command :'describe-env' do |c|
-      cli_syntax(c, 'NAME')
-      c.description = "Show information about an application environment"
-      c.action Commands, :describe_env
-    end
+    # command :'describe-env' do |c|
+    #   cli_syntax(c, 'NAME')
+    #   c.description = "Show information about an application environment"
+    #   c.action Commands, :describe_env
+    # end
 
     command :'describe-type' do |c|
       cli_syntax(c, 'NAME')
