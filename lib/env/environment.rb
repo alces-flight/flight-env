@@ -40,6 +40,7 @@ module Env
       end
 
       def [](k)
+        k += "@#{DEFAULT}" unless k.include?('@')
         all[k.to_sym].tap do |e|
           if e.nil?
             raise NoSuchEnvironmentError, "unknown environment: #{k}"
@@ -48,7 +49,7 @@ module Env
       end
 
       def default
-        Config.data.fetch(:default_environment).gsub('+','@')
+        Config.data.fetch(:default_environment)
       end
 
       def remove_default
@@ -58,68 +59,83 @@ module Env
 
       def set_default(type, name = DEFAULT)
         name ||= DEFAULT
-        e = [type, name].join('+')
-        if all.keys.include?(e.to_sym)
-          Config.data.set(:default_environment, value: e)
-        else
-          raise NoSuchEnvironmentError, "unknown environment: #{[type, name].join('@')}"
+        self[[type, name].join('@')].tap do |env|
+          Config.data.set(:default_environment, value: env.to_s)
+          Config.save
         end
-        Config.save
-        self[e]
       end
 
       def all
         @envs ||=
           begin
             {}.tap do |h|
-              Dir[File.join(Config.user_depot_path,'*')].sort.each do |d|
-                name = File.basename(d)
-                next unless File.directory?(d) && name.match?(/.*\+.*/)
-                h[name.to_sym] = Environment.new(name)
-              end
+                h.merge!(envs_for(Config.user_depot_path, false))
+                h.merge!(envs_for(Config.global_depot_path, true))
             end
           end
       end
 
-      def create(type, name = DEFAULT)
+      def envs_for(path, global)
+        {}.tap do |h|
+          Dir[File.join(path,'*')].sort.each do |d|
+            dir_name = File.basename(d)
+            next unless File.directory?(d) && dir_name.match?(/.*\+.*/)
+            type, name = dir_name.split('+')
+            begin
+              e = Environment.new(Type[type], name, global)
+              h[e.to_s.to_sym] = e
+            rescue
+              nil
+            end
+          end
+        end
+      end
+
+      def create(type, name: DEFAULT, global: false)
         # if unknown type, error
         if type.nil?
           raise UnknownEnvironmentTypeError, "unknown environment type"
         end
         env_name = [type.name,name].join('@')
         # if exists, error
-        if Config.environments.exists?(env_name)
-          raise EnvironmentExistsError, "environment already exists"
+        if (self[env_name] rescue nil)
+          raise EnvironmentExistsError, "environment already exists: #{env_name}"
         end
 
-        type.create(name)
-        Config.environments << env_name
+        env = type.create(name: name, global: global)
+        Config.environments << env
       end
 
-      def purge(type, name = DEFAULT)
+      def purge(type, name: DEFAULT)
         # if unknown type, error
         if type.nil?
           raise UnknownEnvironmentTypeError, "unknown environment type"
         end
         env_name = [type.name,name].join('@')
-        # if not exists, error
-        if ! Config.environments.exists?(env_name)
-          raise NoSuchEnvironmentError, "environment not found"
-        end
-
-        type.purge(name)
-        Config.environments.delete(env_name)
+        env = self[env_name]
+        type.purge(name: name, global: env.global?)
+        Config.environments.delete(env)
       end
     end
 
-    attr_accessor :name, :type
+    attr_accessor :name, :type, :global
 
-    def initialize(name)
-      @type, @name = name.split('+')
+    def initialize(type, name, global = false)
+      @type = type
+      @name = name
+      @global = global
     end
 
     def to_s
-      [@type, @name].join("@")
+      [@type.name, @name].join("@")
+    end
+
+    def global?
+      self.global
+    end
+
+    def activator
+      type.activator(name, global)
     end
   end
 end

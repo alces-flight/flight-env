@@ -33,7 +33,11 @@ module Env
     class Create < Command
       def run
         type, name = args[0].split('@')
-        Environment.create(Type[type], *(name))
+        opts = {}.tap do |h|
+          h[:name] = name unless name.nil?
+          h[:global] = true if @options.global
+        end
+        Environment.create(Type[type], **opts)
       end
     end
   end

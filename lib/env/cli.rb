@@ -56,7 +56,7 @@ module Env
       cli_syntax(c, 'TYPE[@NAME]')
       c.description = 'Activate an application environment'
       c.action Commands, :activate
-      c.option '-i', '--interactive', 'Open an interactive subshell with TYPE environment activated.'
+      c.option '-s', '--subshell', 'Open an interactive subshell with TYPE environment activated.'
     end
 
     command :deactivate do |c|
@@ -86,6 +86,7 @@ module Env
     command :create do |c|
       cli_syntax(c, 'TYPE[@NAME]')
       c.description = "Create a new application environment"
+      c.option '--global', 'Create a shared application environment.'
       c.action Commands, :create
     end
 

@@ -82,42 +82,67 @@ module Env
       @info_file ||= File.join(@dir, 'info.md')
     end
 
-    def create(name = DEFAULT)
+    def create(name: DEFAULT, global: false)
       puts "Creating environment: #{self.name}@#{name}"
-      if File.exists?(user_install_script)
+      if File.exists?(install_script(global))
         Bundler.with_clean_env do
-          IO.popen(['/bin/bash', user_install_script, name]) do |io|
+          IO.popen(
+            {
+              'flight_ENV_ROOT' => depot_path(global),
+              'flight_ENV_CACHE' => build_cache_path(global),
+            },
+            [
+              '/bin/bash',
+              install_script(global),
+              name
+            ]
+          ) do |io|
             puts io.readlines
           end
         end
+      else
+        raise IncompleteTypeError, "no #{global ? 'global ' : ''}creation script provided for type: #{self.name}"
       end
+      Environment.new(self, name, global)
     end
 
-    def purge(name = DEFAULT)
+    def purge(name: DEFAULT, global: false)
       puts "Purging environment: #{self.name}@#{name}"
-      if File.exists?(user_purge_script)
+      if File.exists?(purge_script(global))
         Bundler.with_clean_env do
-          IO.popen(['/bin/bash', user_purge_script, name]) do |io|
+          IO.popen(
+            {
+              'flight_ENV_ROOT' => depot_path(global),
+              'flight_ENV_CACHE' => build_cache_path(global),
+            },
+            [
+              '/bin/bash',
+              purge_script(global),
+              name
+            ]
+          ) do |io|
             puts io.readlines
           end
         end
+      else
+        raise IncompleteTypeError, "no #{global ? 'global ' : ''}purge script provided for type: #{self.name}"
       end
     end
 
-    def activator(name = DEFAULT)
+    def activator(name = DEFAULT, global = false)
       tmpl = ERB.new(File.read(eval_template('activate')))
-      puts tmpl.result(render_binding(name))
+      puts tmpl.result(render_binding(name, global))
     end
 
-    def deactivator(name = DEFAULT)
+    def deactivator(name = DEFAULT, global = false)
       tmpl = ERB.new(File.read(eval_template('deactivate')))
-      puts tmpl.result(render_binding(name))
+      puts tmpl.result(render_binding(name, global))
     end
 
     private
-    def render_binding(name)
+    def render_binding(name, global = false)
       render_ctx = Module.new.class.tap do |eigen|
-        eigen.define_method(:env_root) { Config.user_depot_path }
+        eigen.define_method(:env_root) { global ? Config.global_depot_path : Config.user_depot_path }
         eigen.define_method(:env_name) { name }
       end
       render_ctx.instance_exec { binding }
@@ -133,20 +158,20 @@ module Env
       end
     end
 
-    def user_install_script
-      @user_install_script ||= File.join(@dir, 'user-install.sh')
+    def depot_path(global)
+      global ? Config.global_depot_path : Config.user_depot_path
     end
 
-    def user_purge_script
-      @user_purge_script ||= File.join(@dir, 'user-purge.sh')
+    def purge_script(global)
+      File.join(@dir, "#{global ? 'global' : 'user'}-purge.sh")
     end
 
-    def system_install_script
-      @system_install_script ||= File.join(@dir, 'system-install.sh')
+    def install_script(global)
+      File.join(@dir, "#{global ? 'global' : 'user'}-install.sh")
     end
 
-    def system_purge_script
-      @system_purge_script ||= File.join(@dir, 'system-purge.sh')
+    def build_cache_path(global)
+      global ? Config.global_build_cache_path : Config.user_build_cache_path
     end
   end
 end

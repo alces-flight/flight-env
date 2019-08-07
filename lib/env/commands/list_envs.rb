@@ -35,9 +35,10 @@ module Env
       def run
         cmd = self
         Table.emit do |t|
-          headers 'Name'
-          Environment.each do |t|
-            row "#{Paint[t.type, :cyan]}@#{Paint[t.name, :magenta]}"
+          headers 'Name', 'Scope'
+          Environment.each do |e|
+            row "#{Paint[e.type.name, :cyan]}@#{Paint[e.name, :magenta]}",
+                e.global? ? 'shared' : 'user'
           end
         end
       end

@@ -55,8 +55,7 @@ module Env
       end
 
       def activate
-        type, name = args[0].split('@')
-        puts Type[type].activator(*(name))
+        puts Environment[args[0]].activator
       end
     end
   end

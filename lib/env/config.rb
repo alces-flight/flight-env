@@ -56,6 +56,27 @@ module Env
         end
       end
 
+      def global_data
+        @global_data ||= TTY::Config.new.tap do |cfg|
+          cfg.append_path(File.join(root, 'etc'))
+          begin
+            cfg.read
+          rescue TTY::Config::ReadError
+            nil
+          end
+        end
+      end
+
+      def global_save
+        FileUtils.mkdir_p(
+          File.join(
+            root,
+            'etc'
+          )
+        )
+        global_data.write(force: true)
+      end
+
       def user_depot_path
         @user_depot_path ||= File.join(xdg_data.home, ENV_DIR_SUFFIX)
       end
@@ -64,12 +85,18 @@ module Env
         @user_build_cache_path ||= File.join(xdg_cache.home, ENV_DIR_SUFFIX, 'build')
       end
 
-      def system_depot_path
-        @system_depot_path ||= '/opt/flight/var/lib/env'
+      def global_depot_path
+        @global_depot_path ||= global_data.fetch(
+          :global_depot_path,
+          default: '/opt/flight/var/lib/env'
+        )
       end
 
-      def system_build_cache_path
-        @system_build_cache_path ||= '/opt/flight/var/cache/env/build'
+      def global_build_cache_path
+        @global_build_cache_path ||= global_data.fetch(
+          :global_build_cache_path,
+          default: '/opt/flight/var/cache/env/build'
+        )
       end
 
       def path
@@ -87,28 +114,43 @@ module Env
 
       def environments
         @environments ||=
-          EnvironmentConfig.new(data.fetch(:environments, default: []))
+          EnvironmentConfig.new(data.fetch(:environments, default: []),
+                                global_data.fetch(:environments, default: []))
       end
 
       class EnvironmentConfig
-        def initialize(environments)
+        def initialize(environments, global_environments)
           @environments = environments
+          @global_environments = global_environments
         end
 
-        def exists?(name)
-          @environments.include?(name)
+        def exists?(name, include_global = true)
+          @environments.include?(name) ||
+            @global_environments.include?(name)
         end
 
-        def <<(name)
-          @environments << name
-          Config.data.set(:environments, value: @environments)
-          Config.save
+        def <<(env)
+          if env.global?
+            @global_environments << env.to_s
+            Config.global_data.set(:environments, value: @environments)
+            Config.global_save
+          else
+            @environments << env.to_s
+            Config.data.set(:environments, value: @environments)
+            Config.save
+          end
         end
 
-        def delete(name)
-          @environments.reject! { |e| e == name }
-          Config.data.set(:environments, value: @environments)
-          Config.save
+        def delete(env)
+          if env.global?
+            @global_environments.reject! { |e| e == env.to_s }
+            Config.global_data.set(:environments, value: @environments)
+            Config.global_save
+          else
+            @environments.reject! { |e| e == env.to_s }
+            Config.data.set(:environments, value: @environments)
+            Config.save
+          end
         end
       end
 

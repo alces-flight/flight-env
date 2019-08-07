@@ -32,8 +32,15 @@ module Env
   module Commands
     class Purge < Command
       def run
+        active_env = Environment.active
+        if active_env == args[0] || active_env == [args[0],'default'].join('@')
+          raise ActiveEnvironmentError, "environment currently active: #{active_env}"
+        end
         type, name = args[0].split('@')
-        Environment.purge(Type[type], *(name))
+        opts = {}.tap do |h|
+          h[:name] = name unless name.nil?
+        end
+        Environment.purge(Type[type], **opts)
       end
     end
   end
