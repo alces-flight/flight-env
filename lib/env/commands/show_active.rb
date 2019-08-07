@@ -31,8 +31,11 @@ module Env
   module Commands
     class ShowActive < Command
       def run
-        active_env = Environment.active
-        puts active_env || '(none)'
+        if active_env = Environment.active
+          puts active_env
+        elsif !@options.empty_if_unset
+          puts "(none)"
+        end
       end
     end
   end

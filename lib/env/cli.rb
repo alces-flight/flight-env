@@ -111,6 +111,7 @@ module Env
     command :'show-active' do |c|
       cli_syntax(c)
       c.description = "Show currently active application environment"
+      c.option '--empty-if-unset', 'Don\'t display output if no environment is active.'
       c.action Commands, :show_active
     end
 
