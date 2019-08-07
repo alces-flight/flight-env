@@ -40,9 +40,12 @@ fi
 mkdir -p ${flight_ENV_CACHE}/build
 cd ${flight_ENV_CACHE}/build
 
+env_stage "Verifying prerequisites"
 if [ ! -f Miniconda3-latest-Linux-x86_64.sh ]; then
+  env_stage "Fetching prerequisite (miniconda)"
   wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 fi
 
+env_stage "Creating environment (conda@${name})"
 mkdir -p ${flight_ENV_ROOT}
 bash Miniconda3-latest-Linux-x86_64.sh -b -p ${flight_ENV_ROOT}/conda+${name}

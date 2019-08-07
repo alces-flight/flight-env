@@ -103,7 +103,6 @@ module Env
         end
 
         env = type.create(name: name, global: global)
-        Config.environments << env
       end
 
       def purge(type, name: DEFAULT)
@@ -114,7 +113,6 @@ module Env
         env_name = [type.name,name].join('@')
         env = self[env_name]
         type.purge(name: name, global: env.global?)
-        Config.environments.delete(env)
       end
     end
 

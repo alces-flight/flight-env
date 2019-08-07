@@ -36,4 +36,5 @@ if [ -z "$name" ]; then
   exit 1
 fi
 
+env_stage "Deleting environment tree (modules@${name})"
 rm -rf ${flight_ENV_ROOT}/modules+${name}

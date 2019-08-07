@@ -31,6 +31,7 @@ require 'env/shell'
 require 'erb'
 require 'fileutils'
 require 'yaml'
+require 'whirly'
 
 module Env
   class Type
@@ -83,50 +84,16 @@ module Env
     end
 
     def create(name: DEFAULT, global: false)
-      puts "Creating environment: #{self.name}@#{name}"
-      if File.exists?(install_script(global))
-        Bundler.with_clean_env do
-          IO.popen(
-            {
-              'flight_ENV_ROOT' => depot_path(global),
-              'flight_ENV_CACHE' => build_cache_path(global),
-            },
-            [
-              '/bin/bash',
-              install_script(global),
-              name
-            ]
-          ) do |io|
-            puts io.readlines
-          end
-        end
-      else
-        raise IncompleteTypeError, "no #{global ? 'global ' : ''}creation script provided for type: #{self.name}"
-      end
+      puts "Creating environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]}"
+      run_script(install_script(global), 'install', name, global)
+      puts "Environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]} has been created"
       Environment.new(self, name, global)
     end
 
     def purge(name: DEFAULT, global: false)
-      puts "Purging environment: #{self.name}@#{name}"
-      if File.exists?(purge_script(global))
-        Bundler.with_clean_env do
-          IO.popen(
-            {
-              'flight_ENV_ROOT' => depot_path(global),
-              'flight_ENV_CACHE' => build_cache_path(global),
-            },
-            [
-              '/bin/bash',
-              purge_script(global),
-              name
-            ]
-          ) do |io|
-            puts io.readlines
-          end
-        end
-      else
-        raise IncompleteTypeError, "no #{global ? 'global ' : ''}purge script provided for type: #{self.name}"
-      end
+      puts "Purging environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]}"
+      run_script(purge_script(global), 'purge', name, global)
+      puts "Environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]} has been purged"
     end
 
     def activator(name = DEFAULT, global = false)
@@ -172,6 +139,102 @@ module Env
 
     def build_cache_path(global)
       global ? Config.global_build_cache_path : Config.user_build_cache_path
+    end
+
+    def run_fork(&block)
+      Signal.trap('INT','IGNORE')
+      rd, wr = IO.pipe
+      pid = fork {
+        rd.close
+        Signal.trap('INT','DEFAULT')
+        begin
+          if block.call(wr)
+            exit(0)
+          else
+            exit(1)
+          end
+        rescue Interrupt
+          nil
+        end
+      }
+      wr.close
+      while !rd.eof?
+        line = rd.readline
+        if line =~ /^STAGE:/
+          stage_stop
+          @stage = line[6..-2]
+          stage_start
+        elsif line =~ /^ERR:/
+          puts "== ERROR: #{line[4..-2]}"
+        else
+          puts " > #{line}"
+        end
+      end
+      stage_stop
+      _, status = Process.wait2(pid)
+      Signal.trap('INT','DEFAULT')
+      status.success?
+    end
+
+    def stage_start
+      print "   > "
+      Whirly.start(
+        spinner: 'star',
+        remove_after_stop: true,
+        append_newline: false,
+        status: Paint[@stage, '#2794d8']
+      )
+    end
+
+    def stage_stop
+      return if @stage.nil?
+      Whirly.stop
+      puts "\u2705 #{Paint[@stage, '#2794d8']}"
+    end
+
+    def setup_bash_funcs(h, fileno)
+      h['BASH_FUNC_flight_env_comms()'] = <<EOF
+() { local msg=$1
+ shift
+ if [ "$1" ]; then
+ echo "${msg}:$*" 1>&#{fileno};
+ else
+ cat | sed "s/^/${msg}:/g" 1>&#{fileno};
+ fi
+}
+EOF
+      h['BASH_FUNC_env_err()'] = "() { flight_env_comms ERR \"$@\"\n}"
+      h['BASH_FUNC_env_stage()'] = "() { flight_env_comms STAGE \"$@\"\n}"
+#      h['BASH_FUNC_env_cat()'] = "() { flight_env_comms\n}"
+#      h['BASH_FUNC_env_echo()'] = "() { flight_env_comms DATA \"$@\"\necho \"$@\"\n}"
+    end
+
+    def run_script(script, action, name, global)
+      if File.exists?(script)
+        Bundler.with_clean_env do
+          run_fork do |wr|
+            wr.close_on_exec = false
+            setup_bash_funcs(ENV, wr.fileno)
+            log_file = File.join(
+              build_cache_path(global),
+              "#{self.name}+#{name}.#{action}.log"
+            )
+            exec(
+              {
+                'flight_ENV_ROOT' => depot_path(global),
+                'flight_ENV_CACHE' => build_cache_path(global),
+              },
+              '/bin/bash',
+              script,
+              name,
+              close_others: false,
+              [:out, :err] => [log_file ,'w']
+            )
+          end
+        end
+      else
+        raise IncompleteTypeError, "no #{global ? 'global ' : ''}#{action} script provided for type: #{self.name}"
+      end
     end
   end
 end

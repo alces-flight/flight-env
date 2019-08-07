@@ -40,7 +40,7 @@ module Env
         env = Environment[args[0]]
         if ENV['flight_ENV_eval'].nil?
           if options.subshell
-            puts "Activating: #{@args.first}"
+            puts "Activating environment #{Paint[@args.first, :cyan]}"
             shell = '/bin/bash'
             Bundler.with_clean_env do
               exec(

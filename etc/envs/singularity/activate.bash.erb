@@ -32,4 +32,8 @@ export SINGULARITY_CACHEDIR=<%= env_root %>/singularity+<%= env_name %>/cache
 export SINGULARITY_PULLDIR=<%= env_root %>/singularity+<%= env_name %>/images
 
 export flight_ENV_active=singularity@<%= env_name %>
-PS1="\[\033[48;5;25;1;38;5;189m\]<singularity<%= env_name == 'default' ? '' : "@#{env_name}" %>>\[\033[0m\] $PS1"
+if [[ $TERM == "xterm-256color" ]]; then
+  PS1="\[\033[48;5;25;1;38;5;189m\]<singularity<%= env_name == 'default' ? '' : "@#{env_name}" %>>\[\033[0m\] $PS1"
+else
+  PS1="\[\033[1m\]<singularity<%= env_name == 'default' ? '' : "@#{env_name}" %>>\[\033[0m\] $PS1"
+fi

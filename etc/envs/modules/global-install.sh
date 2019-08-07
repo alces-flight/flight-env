@@ -40,31 +40,44 @@ fi
 mkdir -p ${flight_ENV_CACHE}/build
 cd ${flight_ENV_CACHE}/build
 
-if [ ! -f modules-4.3.0.tar.gz ]; then
+env_stage "Verifying prerequisites"
+if [ ! -d "${flight_ENV_ROOT}"/share/modules/4.3.0 ]; then
   if ! which tclsh &>/dev/null; then
     if [ ! -d ${flight_ENV_ROOT}/share/tcl/8.6.9 ]; then
       if [ ! -f tcl8.6.9-src.tar.gz ]; then
+        env_stage "Fetching prerequisite (tcl)"
         wget https://prdownloads.sourceforge.net/tcl/tcl8.6.9-src.tar.gz
-        tar xzf tcl8.6.9-src.tar.gz
-        cd tcl8.6.9/unix
-        ./configure --prefix=${flight_ENV_ROOT}/share/tcl/8.6.9
-        make
-        make install
-        ln -s ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh8.6 ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh
-        cd ..
       fi
+      env_stage "Extracting prerequisite (tcl)"
+      tar xzf tcl8.6.9-src.tar.gz
+      env_stage "Building prerequisite (tcl)"
+      cd tcl8.6.9/unix
+      ./configure --prefix=${flight_ENV_ROOT}/share/tcl/8.6.9
+      make
+      env_stage "Installing prerequisite (tcl)"
+      make install
+      ln -s ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh8.6 ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh
+      cd ..
     fi
-    tcl_params="--with-tcl=${flight_ENV_ROOT}/share/tcl/8.6.9/lib --with-tclsh=${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh --with-tcl-ver=8.6 --without-tclx"
   fi
-  wget https://sourceforge.net/projects/modules/files/Modules/modules-4.3.0/modules-4.3.0.tar.gz
+  tcl_params="--with-tcl=${flight_ENV_ROOT}/share/tcl/8.6.9/lib --with-tclsh=${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh --with-tcl-ver=8.6 --without-tclx"
+  if [ ! -f modules-4.3.0.tar.gz ]; then
+    env_stage "Fetching prerequisite (modules)"
+    wget https://sourceforge.net/projects/modules/files/Modules/modules-4.3.0/modules-4.3.0.tar.gz
+  fi
+  env_stage "Extracting prerequisite (modules)"
   tar xzf modules-4.3.0.tar.gz
+  env_stage "Building prerequisite (modules)"
   cd modules-4.3.0
   ./configure \
           --disable-versioning \
           --prefix=${flight_ENV_ROOT}/share/modules/4.3.0 $tcl_params
   make
+  env_stage "Installing prerequisite (modules)"
   make install
 fi
+
+env_stage "Creating environment (modules@${name})"
 
 mkdir -p ${flight_ENV_ROOT}/modules+${name}/modulefiles
 cp ${flight_ENV_ROOT}/share/modules/4.3.0/modulefiles/null ${flight_ENV_ROOT}/modules+${name}/modulefiles

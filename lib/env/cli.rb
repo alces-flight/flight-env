@@ -42,6 +42,10 @@ module Env
     default_command :help
     silent_trace!
 
+    if ENV['TERM'] !~ /^xterm/ && ENV['TERM'] !~ /rxvt/
+      Paint.mode = 0
+    end
+
     class << self
       def cli_syntax(command, args_str = nil)
         command.syntax = [
