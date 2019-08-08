@@ -4,9 +4,8 @@ if [ -f ~/.bashrc ]; then
 fi
 
 export flight_ENV_root=$(cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
-. ${flight_ENV_root}/bin/setup-flenv.sh
+. ${flight_ENV_root}/bin/flenv-fnwrapper.sh
 
 set -e
-flenv activate ${flight_ENV_subshell}
+flenv activate ${flight_ENV_subshell_env}
 set +e
-unset flight_ENV_subshell
