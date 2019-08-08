@@ -24,14 +24,15 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
-require 'env/config'
-require 'env/errors'
-require 'env/shell'
+require_relative 'config'
+require_relative 'errors'
+require_relative 'shell'
 
 require 'erb'
 require 'fileutils'
 require 'yaml'
 require 'whirly'
+require_relative 'patches/unicode-display_width'
 
 module Env
   class Type
@@ -219,6 +220,7 @@ EOF
               build_cache_path(global),
               "#{self.name}+#{name}.#{action}.log"
             )
+            FileUtils.mkdir_p(build_cache_path(global))
             exec(
               {
                 'flight_ENV_ROOT' => depot_path(global),

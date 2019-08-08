@@ -24,14 +24,19 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
-require 'env/commands'
-require 'env/version'
+require_relative 'commands'
+require_relative 'version'
 
 require 'commander'
 
 module Env
   module CLI
-    PROGRAM_NAME = ENV.fetch('FLIGHT_PROGRAM_NAME','env')
+    PROGRAM_NAME = ENV.fetch('FLIGHT_PROGRAM_NAME','flenv')
+    EVAL_CMD = ENV.fetch(
+      'FLIGHT_ENV_EVAL_CMD',
+      %(eval "$(flight_ENV_eval=true #{$0} %s)")
+    )
+    EVAL_CMD_GENERATOR = lambda {|cmd| sprintf(EVAL_CMD, cmd)}
 
     extend Commander::Delegates
     program :application, "Flight Environment"
@@ -75,15 +80,15 @@ module Env
       c.action Commands, :switch
     end
 
-    command :'list-envs' do |c|
+    command :avail do |c|
       cli_syntax(c)
-      c.description = "List available application environments"
+      c.description = "Show available application environments"
       c.action Commands, :list_envs
     end
 
-    command :'list-types' do |c|
+    command :list do |c|
       cli_syntax(c)
-      c.description = "List available application environment types"
+      c.description = "List application environment types"
       c.action Commands, :list_types
     end
 
@@ -106,7 +111,7 @@ module Env
     #   c.action Commands, :describe_env
     # end
 
-    command :'describe-type' do |c|
+    command :info do |c|
       cli_syntax(c, 'NAME')
       c.description = "Show information about an application environment type"
       c.action Commands, :describe_type

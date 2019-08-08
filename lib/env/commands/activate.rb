@@ -45,7 +45,7 @@ module Env
             Bundler.with_clean_env do
               exec(
                 {
-                  'flight_ENV_subshell' => @args.first
+                  'flight_ENV_subshell_env' => @args.first
                 },
                 [shell,'flight-env'],
                 '--rcfile',
@@ -53,7 +53,8 @@ module Env
               )
             end
           else
-            raise EvaluatorError, "direct activation not possible; try --subshell, or: flenv activate #{args[0]}"
+            cmd = CLI::EVAL_CMD_GENERATOR.call("activate #{args[0]}")
+            raise EvaluatorError, "directly executed activation not possible; try --subshell, or: '#{cmd}'"
           end
         end
         puts env.activator

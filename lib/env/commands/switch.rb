@@ -52,7 +52,8 @@ module Env
       private
       def assert_evaluatable
         if ENV['flight_ENV_eval'].nil?
-          raise EvaluatorError, "direct switching not possible; try: flenv switch #{args[0]}"
+          cmd = CLI::EVAL_CMD_GENERATOR.call("switch #{args[0]}")
+          raise EvaluatorError, "directly executed switch not possible; try: '#{cmd}'"
         end
       end
 

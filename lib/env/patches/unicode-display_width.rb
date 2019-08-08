@@ -24,29 +24,12 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
-require 'env/command'
-require 'env/environment'
-require 'env/errors'
-require 'env/type'
-
-module Env
-  module Commands
-    class Deactivate < Command
-      def run
-        active_env = Environment.active
-        if active_env.nil?
-          raise ActiveEnvironmentError, 'no active environment'
-        end
-        if ENV['flight_ENV_eval'].nil?
-          cmd = CLI::EVAL_CMD_GENERATOR.call('deactivate')
-          raise EvaluatorError, "directly executed deactivation not possible; try: '#{cmd}'"
-        elsif ENV['flight_ENV_subshell_env']
-          puts 'exit'
-        else
-          type, name = active_env.split('@')
-          puts Type[type].deactivator(*(name))
-        end
-      end
+# Discount ANSI codes when calculating length
+module Unicode::DisplayWidth
+  class << self
+    alias_method :_of, :of
+    def of(string, *a)
+      _of(string.gsub(/\e\[.*?m/,''), *a)
     end
   end
 end

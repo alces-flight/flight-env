@@ -40,8 +40,12 @@ module Env
           manual: 'Alces Flight Software Environments',
           organization: type.author || 'Alces Flight Ltd',
         }
-        doc = Ronn::Document.new(type.info_file, options)
-        pager = ENV['MANPAGER'] || ENV['PAGER'] || 'more'
+        doc = Ronn::Document.new(type.info_file, options) do |f|
+          File.read(f).tap do |s|
+            s.gsub!('%PROGRAM_NAME%', Env::CLI::PROGRAM_NAME)
+          end
+        end
+        pager = ENV['MANPAGER'] || ENV['PAGER'] || 'less -FRX'
         groff = 'groff -Wall -mtty-char -mandoc -Tascii'
         rd, wr = IO.pipe
         if pid = fork
