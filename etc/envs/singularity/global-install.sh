@@ -77,7 +77,11 @@ if [ ! -f singularity-3.2.1.tar.gz ]; then
   cd singularity
   echo '3.2.1' >> VERSION
   env_stage "Building prerequisite (singularity)"
-  ./mconfig --without-suid --prefix=${flight_ENV_ROOT}/share/singularity/3.2.1
+  if [ "$UID" == "0" ]; then
+    ./mconfig --prefix=${flight_ENV_ROOT}/share/singularity/3.2.1
+  else
+    ./mconfig --without-suid --prefix=${flight_ENV_ROOT}/share/singularity/3.2.1
+  fi
   cd builddir
   make
   env_stage "Installing prerequisite (singularity)"
@@ -87,4 +91,4 @@ if [ ! -f singularity-3.2.1.tar.gz ]; then
 fi
 
 env_stage "Creating environment (singularity@${name})"
-mkdir -p ${flight_ENV_ROOT}/singlarity+<%= env_name %>
+mkdir -p "${flight_ENV_ROOT}/singularity+${name}"

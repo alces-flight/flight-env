@@ -42,6 +42,10 @@ cd ${flight_ENV_CACHE}/build
 
 mkdir -p ${flight_ENV_ROOT}
 
+# Stop any existing activatged EasyBuild environment from getting in
+# the way.
+MODULEPATH=""
+
 env_stage "Verifying prerequisites"
 # build LUA
 if [ ! -f lua-5.1.4.9.tar.bz2 ]; then
@@ -59,43 +63,42 @@ if [ ! -f lua-5.1.4.9.tar.bz2 ]; then
 fi
 PATH=${flight_ENV_ROOT}/share/lua/5.1.4.9/bin:$PATH
 
-# build Lmod
-if [ -z "$LMOD_CMD" ]; then
-  # build Tcl
-  if ! which tclsh &>/dev/null; then
+# build Tcl
+if ! which tclsh &>/dev/null; then
+  if [ ! -d ${flight_ENV_ROOT}/share/tcl/8.6.9 ]; then
     if [ ! -f tcl8.6.9-src.tar.gz ]; then
       env_stage "Fetching prerequisite (tcl)"
       wget https://prdownloads.sourceforge.net/tcl/tcl8.6.9-src.tar.gz
-      env_stage "Extracting prerequisite (tcl)"
-      tar xzf tcl8.6.9-src.tar.gz
-      cd tcl8.6.9/unix
-      env_stage "Building prerequisite (tcl)"
-      ./configure --prefix=${flight_ENV_ROOT}/share/tcl/8.6.9
-      make
-      env_stage "Installing prerequisite (tcl)"
-      make install
-      ln -s ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh8.6 ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh
-      cd ..
     fi
-    PATH=${flight_ENV_ROOT}/share/tcl/8.6.9/bin:$PATH
-  fi
-
-  if [ ! -f Lmod-8.1.tar.bz2 ]; then
-    env_stage "Fetching prerequisite (lmod)"
-    wget https://sourceforge.net/projects/lmod/files/Lmod-8.1.tar.bz2
-    env_stage "Extracting prerequisite (lmod)"
-    tar xjf Lmod-8.1.tar.bz2
-    cd Lmod-8.1
-    env_stage "Configuring prerequisite (lmod)"
-    ./configure --prefix=${flight_ENV_ROOT}/share/lmod/8.1 --with-fastTCLInterp=no
-    env_stage "Installing prerequisite (lmod)"
+    env_stage "Extracting prerequisite (tcl)"
+    tar xzf tcl8.6.9-src.tar.gz
+    cd tcl8.6.9/unix
+    env_stage "Building prerequisite (tcl)"
+    ./configure --prefix=${flight_ENV_ROOT}/share/tcl/8.6.9
+    make
+    env_stage "Installing prerequisite (tcl)"
     make install
+    ln -s ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh8.6 ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh
     cd ..
   fi
-
-  # activate `module` command
-  . ${flight_ENV_ROOT}/share/lmod/8.1/lmod/8.1/init/profile
+  PATH=${flight_ENV_ROOT}/share/tcl/8.6.9/bin:$PATH
 fi
+
+if [ ! -f Lmod-8.1.tar.bz2 ]; then
+  env_stage "Fetching prerequisite (lmod)"
+  wget https://sourceforge.net/projects/lmod/files/Lmod-8.1.tar.bz2
+  env_stage "Extracting prerequisite (lmod)"
+  tar xjf Lmod-8.1.tar.bz2
+  cd Lmod-8.1
+  env_stage "Configuring prerequisite (lmod)"
+  ./configure --prefix=${flight_ENV_ROOT}/share/lmod/8.1 --with-fastTCLInterp=no
+  env_stage "Installing prerequisite (lmod)"
+  make install
+  cd ..
+fi
+
+# activate `module` command
+. ${flight_ENV_ROOT}/share/lmod/8.1/lmod/8.1/init/profile
 
 # Install EasyBuild
 if [ ! -f bootstrap_eb.py ]; then
