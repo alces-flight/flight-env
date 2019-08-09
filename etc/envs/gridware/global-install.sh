@@ -27,8 +27,8 @@
 # ==============================================================================
 set -e
 
-flight_ENV_ROOT=${flight_ENV_ROOT:-$HOME/.local/share/flight/env}
-flight_ENV_CACHE=${flight_ENV_CACHE:-$HOME/.cache/flight/env}
+flight_ENV_ROOT=${flight_ENV_ROOT:-/opt/flight/var/lib/env}
+flight_ENV_CACHE=${flight_ENV_CACHE:-/opt/flight/var/cache/env/build}
 name=$1
 
 if [ -z "$name" ]; then

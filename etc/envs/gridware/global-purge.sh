@@ -1,3 +1,4 @@
+#!/bin/bash
 # =============================================================================
 # Copyright (C) 2019-present Alces Flight Ltd.
 #
@@ -24,18 +25,16 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
-module purge
+set -e
 
-flight_ENV_vars=(module gridware LOADEDMODULES _module module _module_avail _module_long_arg_list _module_not_yet_loaded MODULEPATH MODULESHOME MODULERCFILE flight_GRIDWARE_root _colorize orig_module mod cw_DIST ALCES_CONFIG_PATH MODULES_ALCES_TCL cw_COLOUR cw_MODULES_VERBOSE MODULESROOT)
-for flight_ENV_iter in "${flight_ENV_vars[@]}"; do
-  unset $flight_ENV_iter
-done
-unset flight_ENV_iter flight_ENV_vars
+flight_ENV_ROOT=${flight_ENV_ROOT:-/opt/flight/var/lib/env}
+flight_ENV_CACHE=${flight_ENV_CACHE:-/opt/flight/var/cache/env/build}
+name=$1
 
-unset flight_ENV_active
-PS1="${flight_ENV_orig_PS1}"
-unset flight_ENV_orig_PS1
-PATH="${flight_ENV_orig_PATH}"
-unset flight_ENV_orig_PATH
-LD_LIBRARY_PATH="${flight_ENV_orig_LD_LIBRARY_PATH}"
-unset flight_ENV_orig_LD_LIBRARY_PATH
+if [ -z "$name" ]; then
+  echo "error: environment name not supplied"
+  exit 1
+fi
+
+env_stage "Deleting environment tree (gridware@${name})"
+rm -rf ${flight_ENV_ROOT}/gridware+${name}
