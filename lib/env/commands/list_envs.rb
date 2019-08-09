@@ -33,12 +33,17 @@ module Env
   module Commands
     class ListEnvs < Command
       def run
-        cmd = self
-        Table.emit do |t|
-          headers 'Name', 'Scope'
+        if STDOUT.tty?
+          Table.emit do |t|
+            headers 'Name', 'Scope'
+            Environment.each do |e|
+              row "#{Paint[e.type.name, :cyan]}@#{Paint[e.name, :magenta]}",
+                  e.global? ? 'shared' : 'user'
+            end
+          end
+        else
           Environment.each do |e|
-            row "#{Paint[e.type.name, :cyan]}@#{Paint[e.name, :magenta]}",
-                e.global? ? 'shared' : 'user'
+            puts "#{e.type.name}@#{e.name}\t#{e.global? ? 'shared' : 'user'}"
           end
         end
       end
