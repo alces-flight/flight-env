@@ -80,7 +80,7 @@ if ! which tclsh &>/dev/null; then
     env_stage "Installing prerequisite (tcl)"
     make install
     ln -s ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh8.6 ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh
-    cd ..
+    cd ../..
   fi
   PATH=${flight_ENV_ROOT}/share/tcl/8.6.9/bin:$PATH
 fi

@@ -57,7 +57,7 @@ if [ ! -d "${flight_ENV_ROOT}"/share/modules/4.3.0 ]; then
       env_stage "Installing prerequisite (tcl)"
       make install
       ln -s ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh8.6 ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh
-      cd ..
+      cd ../..
     fi
   fi
   tcl_params="--with-tcl=${flight_ENV_ROOT}/share/tcl/8.6.9/lib --with-tclsh=${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh --with-tcl-ver=8.6 --without-tclx"
