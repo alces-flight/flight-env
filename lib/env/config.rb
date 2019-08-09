@@ -44,6 +44,29 @@ module Env
         end
       end
 
+      def user_data
+        @user_data ||= TTY::Config.new.tap do |cfg|
+          xdg_config.all.map do |p|
+            File.join(p, ENV_DIR_SUFFIX)
+          end.each(&cfg.method(:append_path))
+          begin
+            cfg.read
+          rescue TTY::Config::ReadError
+            nil
+          end
+        end
+      end
+
+      def save_user_data
+        FileUtils.mkdir_p(
+          File.join(
+            xdg_config.home,
+            ENV_DIR_SUFFIX
+          )
+        )
+        user_data.write(force: true)
+      end
+
       def user_depot_path
         @user_depot_path ||= File.join(xdg_data.home, ENV_DIR_SUFFIX)
       end

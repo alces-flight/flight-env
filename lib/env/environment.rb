@@ -49,19 +49,19 @@ module Env
       end
 
       def default
-        Config.data.fetch(:default_environment)
+        Config.user_data.fetch(:default_environment)
       end
 
       def remove_default
-        Config.data.delete(:default_environment)
-        Config.save
+        Config.user_data.delete(:default_environment)
+        Config.save_user_data
       end
 
       def set_default(type, name = DEFAULT)
         name ||= DEFAULT
         self[[type, name].join('@')].tap do |env|
-          Config.data.set(:default_environment, value: env.to_s)
-          Config.save
+          Config.user_data.set(:default_environment, value: env.to_s)
+          Config.save_user_data
         end
       end
 
