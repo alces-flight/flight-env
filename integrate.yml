@@ -29,7 +29,7 @@
 :url: https://github.com/alces-flight/flight-env/archive/master.zip
 :version: 1.0.0
 :configure: |
-  if ! flensure wget python-setuptools libuuid-devel zlib-devel; then
+  if ! flensure wget python-setuptools libuuid-devel zlib-devel uuid; then
     exit 1
   fi
   flexec bundle install --path=vendor --without development test
