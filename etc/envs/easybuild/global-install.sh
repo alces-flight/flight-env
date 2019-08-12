@@ -64,25 +64,23 @@ fi
 PATH=${flight_ENV_ROOT}/share/lua/5.1.4.9/bin:$PATH
 
 # build Tcl
-if ! which tclsh &>/dev/null; then
-  if [ ! -d ${flight_ENV_ROOT}/share/tcl/8.6.9 ]; then
-    if [ ! -f tcl8.6.9-src.tar.gz ]; then
-      env_stage "Fetching prerequisite (tcl)"
-      wget https://prdownloads.sourceforge.net/tcl/tcl8.6.9-src.tar.gz
-    fi
-    env_stage "Extracting prerequisite (tcl)"
-    tar xzf tcl8.6.9-src.tar.gz
-    cd tcl8.6.9/unix
-    env_stage "Building prerequisite (tcl)"
-    ./configure --prefix=${flight_ENV_ROOT}/share/tcl/8.6.9
-    make
-    env_stage "Installing prerequisite (tcl)"
-    make install
-    ln -s ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh8.6 ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh
-    cd ../..
+if [ ! -d ${flight_ENV_ROOT}/share/tcl/8.6.9 ]; then
+  if [ ! -f tcl8.6.9-src.tar.gz ]; then
+    env_stage "Fetching prerequisite (tcl)"
+    wget https://prdownloads.sourceforge.net/tcl/tcl8.6.9-src.tar.gz
   fi
-  PATH=${flight_ENV_ROOT}/share/tcl/8.6.9/bin:$PATH
+  env_stage "Extracting prerequisite (tcl)"
+  tar xzf tcl8.6.9-src.tar.gz
+  cd tcl8.6.9/unix
+  env_stage "Building prerequisite (tcl)"
+  ./configure --prefix=${flight_ENV_ROOT}/share/tcl/8.6.9
+  make
+  env_stage "Installing prerequisite (tcl)"
+  make install
+  ln -s ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh8.6 ${flight_ENV_ROOT}/share/tcl/8.6.9/bin/tclsh
+  cd ../..
 fi
+PATH=${flight_ENV_ROOT}/share/tcl/8.6.9/bin:$PATH
 
 if [ ! -f Lmod-8.1.tar.bz2 ]; then
   env_stage "Fetching prerequisite (lmod)"
