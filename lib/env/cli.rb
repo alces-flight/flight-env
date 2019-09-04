@@ -32,11 +32,6 @@ require 'commander'
 module Env
   module CLI
     PROGRAM_NAME = ENV.fetch('FLIGHT_PROGRAM_NAME','flenv')
-    EVAL_CMD = ENV.fetch(
-      'FLIGHT_ENV_EVAL_CMD',
-      %(eval "$(flight_ENV_eval=true #{$0} %s)")
-    )
-    EVAL_CMD_GENERATOR = lambda {|cmd| sprintf(EVAL_CMD, cmd)}
 
     extend Commander::Delegates
     program :application, "Flight Environment"
@@ -46,6 +41,16 @@ module Env
     program :help_paging, false
     default_command :help
     silent_trace!
+
+    error_handler do |runner, e|
+      case e
+      when InterruptedOperationError, TTY::Reader::InputInterrupt
+        $stderr.puts "\n#{Paint['WARNING', :underline, :yellow]}: Cancelled by user"
+        exit(130)
+      else
+        Commander::Runner::DEFAULT_ERROR_HANDLER.call(runner, e)
+      end
+    end
 
     if ENV['TERM'] !~ /^xterm/ && ENV['TERM'] !~ /rxvt/
       Paint.mode = 0
@@ -66,6 +71,7 @@ module Env
       c.description = 'Activate an application environment'
       c.action Commands, :activate
       c.option '-s', '--subshell', 'Open an interactive subshell with TYPE environment activated.'
+      c.option '-g', '--global', 'Consider global application environments only.'
     end
 
     command :deactivate do |c|
@@ -77,12 +83,14 @@ module Env
     command :switch do |c|
       cli_syntax(c, 'TYPE[@NAME]')
       c.description = 'Switch to a different application environment'
+      c.option '-g', '--global', 'Consider global application environments only.'
       c.action Commands, :switch
     end
 
     command :avail do |c|
       cli_syntax(c)
       c.description = "Show available application environments"
+      c.option '-g', '--global', 'Consider global application environments only.'
       c.action Commands, :list_envs
     end
 
@@ -95,13 +103,15 @@ module Env
     command :create do |c|
       cli_syntax(c, 'TYPE[@NAME]')
       c.description = "Create a new application environment"
-      c.option '--global', 'Create a shared application environment.'
+      c.option '-g', '--global', 'Create a global application environment.'
       c.action Commands, :create
     end
 
     command :purge do |c|
       cli_syntax(c, 'TYPE[@NAME]')
       c.description = "Purge an existing application environment"
+      c.option '-g', '--global', 'Consider global application environments only.'
+      c.option '--yes', 'Purge without prompting (DANGEROUS)'
       c.action Commands, :purge
     end
 

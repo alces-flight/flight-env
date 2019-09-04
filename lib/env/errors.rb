@@ -31,4 +31,6 @@ module Env
   EvaluatorError = Class.new(RuntimeError)
   ActiveEnvironmentError = Class.new(RuntimeError)
   IncompleteTypeError = Class.new(RuntimeError)
+  EnvironmentOperationError = Class.new(RuntimeError)
+  InterruptedOperationError = Class.new(RuntimeError)
 end

@@ -30,8 +30,11 @@ export flight_ENV_orig_PS1="$PS1"
 source <%= env_root %>/spack+<%= env_name %>/share/spack/setup-env.sh
 
 export flight_ENV_active=spack@<%= env_name %>
+export flight_ENV_scope=<%= env_global ? 'global' : 'user' %>
+export flight_ENV_dir=<%= env_root %>/spack+<%= env_name %>
+
 if [[ $TERM == "xterm-256color" ]]; then
-  PS1="\[\033[48;5;25;1;38;5;189m\]<spack<%= env_name == 'default' ? '' : "@#{env_name}" %>>\[\033[0m\] $PS1"
+  PS1="\[\033[48;5;25;1;38;5;189m\]<spack<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '\[\033[1;38;5;219m\]{+}\[\033[1;38;5;189m\]' : '' %>>\[\033[0m\] $PS1"
 else
-  PS1="\[\033[1m\]<spack<%= env_name == 'default' ? '' : "@#{env_name}" %>>\[\033[0m\] $PS1"
+  PS1="\[\033[1m\]<spack<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '\[\033[7m\]{+}\[\033[0;1m\]' : '' %>>\[\033[0m\] $PS1"
 fi

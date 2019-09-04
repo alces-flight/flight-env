@@ -34,8 +34,11 @@ source <%= env_root %>/share/modules/4.3.0/init/bash
 source <%= env_root %>/modules+<%= env_name %>/modules.bash.rc
 
 export flight_ENV_active=modules@<%= env_name %>
+export flight_ENV_scope=<%= env_global ? 'global' : 'user' %>
+export flight_ENV_dir=<%= env_root %>/modules+<%= env_name %>
+
 if [[ $TERM == "xterm-256color" ]]; then
-  PS1="\[\033[48;5;25;1;38;5;189m\]<modules<%= env_name == 'default' ? '' : "@#{env_name}" %>>\[\033[0m\] $PS1"
+  PS1="\[\033[48;5;25;1;38;5;189m\]<modules<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '\[\033[1;38;5;219m\]{+}\[\033[1;38;5;189m\]' : '' %>>\[\033[0m\] $PS1"
 else
-  PS1="\[\033[1m\]<modules<%= env_name == 'default' ? '' : "@#{env_name}" %>>\[\033[0m\] $PS1"
+  PS1="\[\033[1m\]<modules<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '\[\033[7m\]{+}\[\033[0;1m\]' : '' %>>\[\033[0m\] $PS1"
 fi

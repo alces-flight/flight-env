@@ -24,32 +24,20 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
-require 'env/command'
-require 'env/environment'
-require 'env/errors'
-require 'env/type'
+set flight_ENV_orig_PATH = "$PATH"
+set flight_ENV_orig_prompt = "$prompt"
 
-module Env
-  module Commands
-    class Deactivate < Command
-      def run
-        active_env = Environment.active
-        if active_env.nil?
-          raise ActiveEnvironmentError, 'no active environment'
-        end
-        shell = Shell.type
-        if shell == Shell::UNK
-          raise EvaluatorError, "unrecognized shell: #{Shell.type_name}"
-        end
-        if ENV['flight_ENV_eval'].nil?
-          cmd = shell.eval_cmd_for('deactivate')
-          raise EvaluatorError, "directly executed deactivation not possible; try: '#{cmd}'"
-        elsif ENV['flight_ENV_subshell_env']
-          puts shell.exit_cmd
-        else
-          puts active_env.deactivator
-        end
-      end
-    end
-  end
-end
+setenv PATH <%= env_root %>/share/singularity/3.2.1/bin:$PATH
+setenv SINGULARITY_CACHEDIR <%= env_root %>/singularity+<%= env_name %>/cache
+setenv SINGULARITY_PULLDIR <%= env_root %>/singularity+<%= env_name %>/images
+
+setenv flight_ENV_active singularity@<%= env_name %>
+setenv flight_ENV_scope <%= env_global ? 'global' : 'user' %>
+setenv flight_ENV_dir <%= env_root %>/singularity+<%= env_name %>
+
+set bold='%{\033[1m%}'
+set reverse='%{\033[7m%}'
+set reset='%{\033[0;1m%}'
+set clr='%{\033[0m%}'
+set prompt="$bold<singularity<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '$reverse{+}$reset' : '' %>>$clr $prompt"
+unset bold reverse reset clr

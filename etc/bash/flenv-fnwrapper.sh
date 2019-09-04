@@ -62,11 +62,11 @@ flenv() {
   unset FLIGHT_PROGRAM_NAME
 }
 
-export FLIGHT_ENV_EVAL_CMD='flenv %s'
+export flight_ENV_eval_cmd='flenv %s'
 
 if [ $sourced == 1 ]; then
   unset sourced
-  export flight_ENV_root=$(cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
+  export flight_ENV_root=$(cd $(dirname "${BASH_SOURCE[0]}")/../.. && pwd)
 else
   echo "$0: this script should be sourced, not executed"
   exit 1

@@ -24,32 +24,23 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
-require 'env/command'
-require 'env/environment'
-require 'env/errors'
-require 'env/type'
+set command = `echo $args | cut -f1 -d' '`
 
-module Env
-  module Commands
-    class Deactivate < Command
-      def run
-        active_env = Environment.active
-        if active_env.nil?
-          raise ActiveEnvironmentError, 'no active environment'
-        end
-        shell = Shell.type
-        if shell == Shell::UNK
-          raise EvaluatorError, "unrecognized shell: #{Shell.type_name}"
-        end
-        if ENV['flight_ENV_eval'].nil?
-          cmd = shell.eval_cmd_for('deactivate')
-          raise EvaluatorError, "directly executed deactivation not possible; try: '#{cmd}'"
-        elsif ENV['flight_ENV_subshell_env']
-          puts shell.exit_cmd
-        else
-          puts active_env.deactivator
-        end
-      end
-    end
-  end
-end
+if ( "$command" == "activate" || "$command" == "deactivate" || "$command" == "switch" ) then
+  setenv flight_ENV_eval true
+  set tmpf = `mktemp /tmp/flenv.tcsh.XXXXXXX`
+  $flight_ENV_root/bin/flenv $args > $tmpf
+  set _exit=$?
+  if ($_exit == 0) then
+    source $tmpf
+  endif
+  rm -f $tmpf
+  unset tmpf
+  unsetenv flight_ENV_eval
+else
+  $flight_ENV_root/bin/flenv $args
+  set _exit=$?
+endif
+
+unset args
+test 0 = $_exit

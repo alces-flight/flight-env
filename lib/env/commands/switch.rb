@@ -33,32 +33,31 @@ module Env
   module Commands
     class Switch < Command
       def run
+        Environment.global_only = true if @options.global
         active_env = Environment.active
+        target_env = Environment[args[0]]
         if active_env.nil?
           assert_evaluatable
-          puts activator
+          puts target_env.activator
           return
-        elsif active_env == args[0] || active_env == [args[0],'default'].join('@')
+        elsif active_env == target_env
           raise ActiveEnvironmentError, "environment already active: #{active_env}"
         end
         assert_evaluatable
-        type, name = active_env.split('@')
-        deactivation = Type[type].deactivator(*(name))
-        activation = activator
-        puts deactivation
-        puts activation
+        puts active_env.deactivator
+        puts target_env.activator
       end
 
       private
       def assert_evaluatable
         if ENV['flight_ENV_eval'].nil?
-          cmd = CLI::EVAL_CMD_GENERATOR.call("switch #{args[0]}")
+          shell = Shell.type
+          if shell == Shell::UNK
+            raise EvaluatorError, "unrecognized shell: #{Shell.type_name}"
+          end
+          cmd = shell.eval_cmd_for("switch #{args[0]}")
           raise EvaluatorError, "directly executed switch not possible; try: '#{cmd}'"
         end
-      end
-
-      def activator
-        Environment[args[0]].activator
       end
     end
   end

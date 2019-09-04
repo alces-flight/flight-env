@@ -32,6 +32,6 @@ for flight_ENV_iter in "${flight_ENV_vars[@]}"; do
 done
 unset flight_ENV_iter flight_ENV_vars
 
-unset flight_ENV_active
+unset flight_ENV_active flight_ENV_scope flight_ENV_dir
 PS1="${flight_ENV_orig_PS1}"
 unset flight_ENV_orig_PS1

@@ -136,6 +136,11 @@ module use ${flight_ENV_ROOT}/gridware+${name}/local/el7/etc/modules
 export ALCES_CONFIG_PATH="${flight_ENV_ROOT}/gridware+${name}/etc"
 export cw_DIST=el7
 EOF
+cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/gridware.tcsh.rc
+module use ${flight_ENV_ROOT}/gridware+${name}/local/el7/etc/modules
+setenv ALCES_CONFIG_PATH "${flight_ENV_ROOT}/gridware+${name}/etc"
+setenv cw_DIST el7
+EOF
 cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/etc/gridware.yml
 ################################################################################
 ##

@@ -24,32 +24,22 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
-require 'env/command'
-require 'env/environment'
-require 'env/errors'
-require 'env/type'
+module purge
 
-module Env
-  module Commands
-    class Deactivate < Command
-      def run
-        active_env = Environment.active
-        if active_env.nil?
-          raise ActiveEnvironmentError, 'no active environment'
-        end
-        shell = Shell.type
-        if shell == Shell::UNK
-          raise EvaluatorError, "unrecognized shell: #{Shell.type_name}"
-        end
-        if ENV['flight_ENV_eval'].nil?
-          cmd = shell.eval_cmd_for('deactivate')
-          raise EvaluatorError, "directly executed deactivation not possible; try: '#{cmd}'"
-        elsif ENV['flight_ENV_subshell_env']
-          puts shell.exit_cmd
-        else
-          puts active_env.deactivator
-        end
-      end
-    end
-  end
+foreach evar (MODULERCFILE MODULES_ALCES_TCL flight_GRIDWARE_root cw_COLOUR cw_MODULES_VERBOSE MODULESROOT MODULESHOME MODULEPATH LOADEDMODULES ALCES_CONFIG_PATH cw_DIST)
+  unsetenv $evar
 end
+unset evar
+
+foreach avar (module gridware gr mod)
+  unalias $avar
+end
+unset avar
+
+unsetenv flight_ENV_active flight_ENV_scope flight_ENV_dir
+set prompt="${flight_ENV_orig_prompt}"
+unset flight_ENV_orig_prompt
+setenv PATH "${flight_ENV_orig_PATH}"
+unset flight_ENV_orig_PATH
+setenv LD_LIBRARY_PATH "${flight_ENV_orig_LD_LIBRARY_PATH}"
+unset flight_ENV_orig_LD_LIBRARY_PATH

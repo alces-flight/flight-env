@@ -82,3 +82,6 @@ cp ${flight_ENV_ROOT}/share/modules/4.3.0/modulefiles/null ${flight_ENV_ROOT}/mo
 cat <<EOF > ${flight_ENV_ROOT}/modules+${name}/modules.bash.rc
 module use ${flight_ENV_ROOT}/modules+${name}/modulefiles
 EOF
+cat <<EOF > ${flight_ENV_ROOT}/modules+${name}/modules.tcsh.rc
+module use ${flight_ENV_ROOT}/modules+${name}/modulefiles
+EOF

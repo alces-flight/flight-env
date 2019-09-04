@@ -43,5 +43,10 @@ module Env
     def run
       raise NotImplementedError
     end
+
+    def pretty_name(env)
+      Paint[env.type.name, :cyan] +
+        '@' + Paint[env.name, :magenta]
+    end
   end
 end

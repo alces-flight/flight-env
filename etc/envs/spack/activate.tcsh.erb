@@ -24,32 +24,21 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
-require 'env/command'
-require 'env/environment'
-require 'env/errors'
-require 'env/type'
+set flight_ENV_orig_PATH = "$PATH"
+set flight_ENV_orig_prompt = "$prompt"
 
-module Env
-  module Commands
-    class Deactivate < Command
-      def run
-        active_env = Environment.active
-        if active_env.nil?
-          raise ActiveEnvironmentError, 'no active environment'
-        end
-        shell = Shell.type
-        if shell == Shell::UNK
-          raise EvaluatorError, "unrecognized shell: #{Shell.type_name}"
-        end
-        if ENV['flight_ENV_eval'].nil?
-          cmd = shell.eval_cmd_for('deactivate')
-          raise EvaluatorError, "directly executed deactivation not possible; try: '#{cmd}'"
-        elsif ENV['flight_ENV_subshell_env']
-          puts shell.exit_cmd
-        else
-          puts active_env.deactivator
-        end
-      end
-    end
-  end
-end
+setenv SPACK_ROOT <%= env_root %>/spack+<%= env_name %>
+source <%= env_root %>/spack+<%= env_name %>/share/spack/setup-env.csh
+eval `spack --print-shell-vars csh,modules`
+source ${_sp_module_prefix}/Modules/init/tcsh
+
+setenv flight_ENV_active spack@<%= env_name %>
+setenv flight_ENV_scope <%= env_global ? 'global' : 'user' %>
+setenv flight_ENV_dir <%= env_root %>/spack+<%= env_name %>
+
+set bold='%{\033[1m%}'
+set reverse='%{\033[7m%}'
+set reset='%{\033[0;1m%}'
+set clr='%{\033[0m%}'
+set prompt="$bold<spack<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '$reverse{+}$reset' : '' %>>$clr $prompt"
+unset bold reverse reset clr

@@ -27,20 +27,28 @@
 require 'env/command'
 require 'env/environment'
 require 'env/type'
+require 'tty/prompt'
 
 module Env
   module Commands
     class Purge < Command
       def run
-        active_env = Environment.active
-        if active_env == args[0] || active_env == [args[0],'default'].join('@')
-          raise ActiveEnvironmentError, "environment currently active: #{active_env}"
+        Environment.global_only = true if @options.global
+        target_env = Environment[args[0]]
+        if target_env == Environment.active
+          raise ActiveEnvironmentError, "environment currently active: #{target_env}"
         end
-        type, name = args[0].split('@')
-        opts = {}.tap do |h|
-          h[:name] = name unless name.nil?
+        prompt = TTY::Prompt.new
+        do_purge = @options.yes || prompt.yes?(
+          "Purge #{target_env.global? ? 'global ' : ''}environment #{pretty_name(target_env)}?"
+        ) do |q|
+          q.default false
         end
-        Environment.purge(Type[type], **opts)
+        if do_purge
+          target_env.purge
+        else
+          puts "#{target_env.global? ? 'Global e' : 'E'}Environment #{pretty_name(target_env)} not purged."
+        end
       end
     end
   end

@@ -1,3 +1,4 @@
+#!/bin/tcsh
 # =============================================================================
 # Copyright (C) 2019-present Alces Flight Ltd.
 #
@@ -24,32 +25,48 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
-require 'env/command'
-require 'env/environment'
-require 'env/errors'
-require 'env/type'
+if ($?tcsh) then
+  setenv flight_ENV_shell tcsh
+else
+  setenv flight_ENV_shell csh
+endif
 
-module Env
-  module Commands
-    class Deactivate < Command
-      def run
-        active_env = Environment.active
-        if active_env.nil?
-          raise ActiveEnvironmentError, 'no active environment'
-        end
-        shell = Shell.type
-        if shell == Shell::UNK
-          raise EvaluatorError, "unrecognized shell: #{Shell.type_name}"
-        end
-        if ENV['flight_ENV_eval'].nil?
-          cmd = shell.eval_cmd_for('deactivate')
-          raise EvaluatorError, "directly executed deactivation not possible; try: '#{cmd}'"
-        elsif ENV['flight_ENV_subshell_env']
-          puts shell.exit_cmd
-        else
-          puts active_env.deactivator
-        end
-      end
-    end
-  end
-end
+set prefix=""
+set postfix=""
+
+if ( $?histchars ) then
+  set histchar = `echo $histchars | cut -c1`
+  set _histchars = $histchars
+
+  set prefix  = 'unset histchars;'
+  set postfix = 'set histchars = $_histchars;'
+else
+  set histchar = \!
+endif
+
+if ($?noglob) then
+  set prefix  = "$prefix""set noglob;"
+  set postfix = "$postfix""unset noglob;"
+endif
+
+set postfix = "set _exit="'$status'"; $postfix; test 0 = "'$_exit;'
+
+if (! $?sourcechk) then
+  set sourcechk=($_)
+  if ( "$sourcechk" == "" ) then
+    echo "${0}: this script should be sourced, not executed"
+    exit 1
+  endif
+endif
+if (! $?flight_ENV_root) then
+  set dirname=`dirname $sourcechk[2]`
+  setenv flight_ENV_root `cd $dirname/../.. && pwd`
+  unset dirname
+endif
+unset sourcechk
+
+alias flenv $prefix'set args="'$histchar'*";source '$flight_ENV_root'/etc/tcsh/flenv.tcsh; '$postfix;
+unset prefix
+unset postfix
+
+setenv flight_ENV_eval_cmd 'flenv %s'

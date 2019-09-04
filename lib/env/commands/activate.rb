@@ -28,36 +28,39 @@ require 'env/command'
 require 'env/environment'
 require 'env/errors'
 require 'env/type'
+require_relative '../shell'
 
 module Env
   module Commands
     class Activate < Command
       def run
+        Environment.global_only = true if @options.global
         active_env = Environment.active
-        unless active_env.nil?
+        target_env = Environment[args[0]]
+        if active_env == target_env
+          raise ActiveEnvironmentError, "environment already active: #{active_env}"
+        elsif !active_env.nil?
           raise ActiveEnvironmentError, "existing active environment detected: #{active_env}"
         end
-        env = Environment[args[0]]
         if ENV['flight_ENV_eval'].nil?
-          if options.subshell
-            puts "Activating environment #{Paint[@args.first, :cyan]}"
-            shell = '/bin/bash'
+          shell = Shell.type
+          if shell == Shell::UNK
+            raise EvaluatorError, "unrecognized shell: #{Shell.type_name}"
+          elsif options.subshell
+            puts "Activating environment #{pretty_name(target_env)}"
             Bundler.with_clean_env do
               exec(
-                {
-                  'flight_ENV_subshell_env' => @args.first
-                },
-                [shell,'flight-env'],
-                '--rcfile',
-                File.join(Config.root,'etc','bashrc')
+                shell.env.merge('flight_ENV_subshell_env' => @args.first),
+                [shell.path,'flight-env'],
+                *(shell.args)
               )
             end
           else
-            cmd = CLI::EVAL_CMD_GENERATOR.call("activate #{args[0]}")
+            cmd = shell.eval_cmd_for("activate #{args[0]}")
             raise EvaluatorError, "directly executed activation not possible; try --subshell, or: '#{cmd}'"
           end
         end
-        puts env.activator
+        puts target_env.activator
       end
     end
   end

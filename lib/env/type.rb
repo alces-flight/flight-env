@@ -86,15 +86,33 @@ module Env
 
     def create(name: DEFAULT, global: false)
       puts "Creating environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]}"
-      run_script(install_script(global), 'install', name, global)
-      puts "Environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]} has been created"
-      Environment.new(self, name, global)
+      if run_script(install_script(global), 'install', name, global)
+        puts "Environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]} has been created"
+        Environment.new(self, name, global)
+      else
+        log_file = File.join(
+          build_cache_path(global),
+          "#{self.name}+#{name}.install.log"
+        )
+        raise EnvironmentOperationError, "Creation of environment #{self.name}@#{name} failed; see: #{log_file}"
+      end
+    rescue
+      old_stderr, old_stdout = $stderr, $stdout
+      suppress_output { purge(name: name, global: global) }
+      raise
     end
 
     def purge(name: DEFAULT, global: false)
       puts "Purging environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]}"
-      run_script(purge_script(global), 'purge', name, global)
-      puts "Environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]} has been purged"
+      if run_script(purge_script(global), 'purge', name, global)
+        puts "Environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]} has been purged"
+      else
+        log_file = File.join(
+          build_cache_path(global),
+          "#{self.name}+#{name}.purge.log"
+        )
+        raise EnvironmentOperationError, "Purge of environment #{self.name}@#{name} failed; see: #{log_file}"
+      end
     end
 
     def activator(name = DEFAULT, global = false)
@@ -112,6 +130,7 @@ module Env
       render_ctx = Module.new.class.tap do |eigen|
         eigen.define_method(:env_root) { global ? Config.global_depot_path : Config.user_depot_path }
         eigen.define_method(:env_name) { name }
+        eigen.define_method(:env_global) { global }
       end
       render_ctx.instance_exec { binding }
     end
@@ -171,8 +190,9 @@ module Env
           puts " > #{line}"
         end
       end
-      stage_stop
       _, status = Process.wait2(pid)
+      raise InterruptedOperationError, "Interrupt" if status.termsig == 2
+      stage_stop(status.success?)
       Signal.trap('INT','DEFAULT')
       status.success?
     end
@@ -187,10 +207,10 @@ module Env
       )
     end
 
-    def stage_stop
+    def stage_stop(success = true)
       return if @stage.nil?
       Whirly.stop
-      puts "\u2705 #{Paint[@stage, '#2794d8']}"
+     puts "#{success ? "\u2705" : "\u274c"} #{Paint[@stage, '#2794d8']}"
     end
 
     def setup_bash_funcs(h, fileno)
@@ -227,6 +247,7 @@ EOF
                 'flight_ENV_CACHE' => build_cache_path(global),
               },
               '/bin/bash',
+              '-x',
               script,
               name,
               close_others: false,
@@ -237,6 +258,16 @@ EOF
       else
         raise IncompleteTypeError, "no #{global ? 'global ' : ''}#{action} script provided for type: #{self.name}"
       end
+    end
+
+    def suppress_output
+      original_stderr, original_stdout = $stderr.clone, $stdout.clone
+      $stderr.reopen(File.new('/dev/null', 'w'))
+      $stdout.reopen(File.new('/dev/null', 'w'))
+      yield
+    ensure
+      $stdout.reopen(original_stdout)
+      $stderr.reopen(original_stderr)
     end
   end
 end

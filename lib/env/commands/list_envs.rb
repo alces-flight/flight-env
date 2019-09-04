@@ -33,17 +33,19 @@ module Env
   module Commands
     class ListEnvs < Command
       def run
+        Environment.global_only = true if @options.global
+        cmd = self
         if STDOUT.tty?
           Table.emit do |t|
             headers 'Name', 'Scope'
             Environment.each do |e|
-              row "#{Paint[e.type.name, :cyan]}@#{Paint[e.name, :magenta]}",
-                  e.global? ? 'shared' : 'user'
+              row cmd.pretty_name(e),
+                  e.global? ? 'global' : 'user'
             end
           end
         else
           Environment.each do |e|
-            puts "#{e.type.name}@#{e.name}\t#{e.global? ? 'shared' : 'user'}"
+            puts "#{e.type.name}@#{e.name}\t#{e.global? ? 'global' : 'user'}"
           end
         end
       end

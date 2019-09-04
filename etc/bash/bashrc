@@ -3,8 +3,8 @@ if [ -f ~/.bashrc ]; then
   . ~/.bashrc
 fi
 
-export flight_ENV_root=$(cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
-. ${flight_ENV_root}/bin/flenv-fnwrapper.sh
+export flight_ENV_root=$(cd $(dirname "${BASH_SOURCE[0]}")/../.. && pwd)
+. ${flight_ENV_root}/etc/bash/flenv-fnwrapper.sh
 
 set -e
 flenv activate ${flight_ENV_subshell_env}

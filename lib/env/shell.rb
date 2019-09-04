@@ -24,33 +24,83 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
+require_relative 'config'
+
 require 'sys/proctable'
 
 module Env
   class Shell
     class << self
-      def type
-        case Sys::ProcTable
-               .ps(pid: Process.ppid)
-               .name
-        when /bash/
-          BASH
-        when /tcsh/
-          TCSH
+      def [](name)
+        shells[name]
+      end
+
+      def []=(name, shell)
+        shells[name] = shell
+      end
+
+      def shells
+        @shells ||= {}
+      end
+
+      def type_name
+        if name = ENV['flight_ENV_shell']
+          name
         else
-          UNK
+          Sys::ProcTable
+                .ps(pid: Process.ppid)
+                .name
         end
+      end
+
+      def type
+        Shell[type_name] || UNK
       end
     end
 
-    attr_reader :name
+    attr_reader :name, :exit_cmd, :eval_cmd, :args, :env, :path
 
-    def initialize(name)
+    def initialize(name, exit_cmd = nil, eval_cmd = nil, args = [], env = {}, path = nil)
       @name = name
+      @exit_cmd = exit_cmd
+      @eval_cmd = eval_cmd
+      @args = args
+      @env = env
+      @path = path || "/bin/#{name}"
+      Shell[name] = self
     end
 
-    BASH = Shell.new('bash')
-    TCSH = Shell.new('tcsh')
+    def eval_cmd_for(cmd)
+      sprintf(
+        ENV.fetch(
+          'flight_ENV_eval_cmd',
+          eval_cmd
+        ),
+        cmd
+      )
+    end
+
+    BASH = Shell.new(
+      'bash',
+      'exit',
+      %(eval "$(flight_ENV_eval=true #{$0} %s)"),
+      [
+        '--rcfile',
+        File.join(Config.root,'etc','bash','bashrc')
+      ]
+    )
+    TCSH = Shell.new(
+      'tcsh',
+      'logout',
+      %(eval `(setenv flight_ENV_eval true; #{$0} %s)`),
+      [
+        '-l'
+      ],
+      {
+        'flight_ENV_root' => Config.root,
+        'HOME' => File.join(Config.root,'etc','tcsh')
+      }
+    )
     UNK = Shell.new('unknown')
   end
 end

@@ -46,10 +46,12 @@ gridware() {
         /opt/flight/bin/flexec ruby bin/gridware "$@"
   )
 }
+export -f gridware
 
 gr() {
   gridware "$@"
 }
+export -f gr
 
 _colorize() {
   local flight_MODULES_colour=${flight_MODULES_colour:-1}
@@ -146,8 +148,10 @@ _colorize() {
     esac
   done 1>&2
 }
+export -f _colorize
 
 eval "$(echo "orig_module()"; declare -f module | tail -n +2)"
+export -f orig_module
 
 module() {
   case $1 in
@@ -172,10 +176,14 @@ module() {
 mod() {
   module "$@"
 }
+export -f mod
 
 export flight_ENV_active=gridware@<%= env_name %>
+export flight_ENV_scope=<%= env_global ? 'global' : 'user' %>
+export flight_ENV_dir=<%= env_root %>/gridware+<%= env_name %>
+
 if [[ $TERM == "xterm-256color" ]]; then
-  PS1="\[\033[48;5;25;1;38;5;189m\]<gridware<%= env_name == 'default' ? '' : "@#{env_name}" %>>\[\033[0m\] $PS1"
+  PS1="\[\033[48;5;25;1;38;5;189m\]<gridware<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '\[\033[1;38;5;219m\]{+}\[\033[1;38;5;189m\]' : '' %>>\[\033[0m\] $PS1"
 else
-  PS1="\[\033[1m\]<gridware<%= env_name == 'default' ? '' : "@#{env_name}" %>>\[\033[0m\] $PS1"
+  PS1="\[\033[1m\]<gridware<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '\[\033[7m\]{+}\[\033[0;1m\]' : '' %>>\[\033[0m\] $PS1"
 fi

@@ -24,32 +24,26 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
-require 'env/command'
-require 'env/environment'
-require 'env/errors'
-require 'env/type'
+module purge
 
-module Env
-  module Commands
-    class Deactivate < Command
-      def run
-        active_env = Environment.active
-        if active_env.nil?
-          raise ActiveEnvironmentError, 'no active environment'
-        end
-        shell = Shell.type
-        if shell == Shell::UNK
-          raise EvaluatorError, "unrecognized shell: #{Shell.type_name}"
-        end
-        if ENV['flight_ENV_eval'].nil?
-          cmd = shell.eval_cmd_for('deactivate')
-          raise EvaluatorError, "directly executed deactivation not possible; try: '#{cmd}'"
-        elsif ENV['flight_ENV_subshell_env']
-          puts shell.exit_cmd
-        else
-          puts active_env.deactivator
-        end
-      end
-    end
-  end
+foreach var (module_avail_opts module_clear_opts module_cmds module_config_opts module_list_opts module_load_opts module_opts module_path_opts module_rm_path_opts)
+  unset $var
 end
+
+foreach evar (LOADEDMODULES MODULEPATH MODULES_CMD MODULESHOME MODULES_USE_COMPAT_VERSION MODULEPATH_modshare)
+  unsetenv $evar
+end
+unset evar
+
+foreach avar (_module_avail _module_loaded _module_modulepath _module_not_yet_loaded _module_savelist  _module_savelist module switchml)
+  unalias $avar
+end
+unset avar
+
+unsetenv flight_ENV_active flight_ENV_scope flight_ENV_dir
+set prompt="${flight_ENV_orig_prompt}"
+unset flight_ENV_orig_prompt
+setenv PATH "${flight_ENV_orig_PATH}"
+unset flight_ENV_orig_PATH
+setenv LD_LIBRARY_PATH "${flight_ENV_orig_LD_LIBRARY_PATH}"
+unset flight_ENV_orig_LD_LIBRARY_PATH

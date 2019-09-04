@@ -32,6 +32,7 @@ module Env
   module Commands
     class Create < Command
       def run
+        Environment.global_only = true if @options.global
         type, name = args[0].split('@')
         opts = {}.tap do |h|
           h[:name] = name unless name.nil?

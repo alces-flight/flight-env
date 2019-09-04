@@ -31,17 +31,33 @@ module Env
     DEFAULT = 'default'
 
     class << self
+      def global_only=(val)
+        @global_only = val
+      end
+
       def active
-        ENV['flight_ENV_active']
+        candidates =
+          if ENV['flight_ENV_scope'] == 'user'
+            user_envs
+          elsif ENV['flight_ENV_scope'] == 'global'
+            global_envs
+          else
+            all
+          end
+        fetch(ENV['flight_ENV_active'], candidates)
       end
 
       def each(&block)
-        all.values.each(&block)
+        envs.each(&block)
       end
 
       def [](k)
-        k += "@#{DEFAULT}" unless k.include?('@')
-        all[k.to_sym].tap do |e|
+        if !k.include?('@')
+          env =
+            fetch(k + "@#{DEFAULT}") ||
+            envs.find{|e| e.to_s.start_with?(k + '@')}
+        end
+        (env || fetch(k)).tap do |e|
           if e.nil?
             raise NoSuchEnvironmentError, "unknown environment: #{k}"
           end
@@ -65,32 +81,6 @@ module Env
         end
       end
 
-      def all
-        @envs ||=
-          begin
-            {}.tap do |h|
-                h.merge!(envs_for(Config.user_depot_path, false))
-                h.merge!(envs_for(Config.global_depot_path, true))
-            end
-          end
-      end
-
-      def envs_for(path, global)
-        {}.tap do |h|
-          Dir[File.join(path,'*')].sort.each do |d|
-            dir_name = File.basename(d)
-            next unless File.directory?(d) && dir_name.match?(/.*\+.*/)
-            type, name = dir_name.split('+')
-            begin
-              e = Environment.new(Type[type], name, global)
-              h[e.to_s.to_sym] = e
-            rescue
-              nil
-            end
-          end
-        end
-      end
-
       def create(type, name: DEFAULT, global: false)
         # if unknown type, error
         if type.nil?
@@ -105,14 +95,40 @@ module Env
         env = type.create(name: name, global: global)
       end
 
-      def purge(type, name: DEFAULT)
-        # if unknown type, error
-        if type.nil?
-          raise UnknownEnvironmentTypeError, "unknown environment type"
+      private
+      def fetch(k, candidates = envs)
+        candidates.find{|e| e.to_s == k}
+      end
+
+      def user_envs
+        @user_envs ||= envs_for(Config.user_depot_path, false)
+      end
+
+      def global_envs
+        @global_envs ||= envs_for(Config.global_depot_path, true)
+      end
+
+      def all
+        @all ||= user_envs + global_envs
+      end
+
+      def envs
+        @global_only ? global_envs : all
+      end
+
+      def envs_for(path, global)
+        [].tap do |a|
+          Dir[File.join(path,'*')].sort.each do |d|
+            dir_name = File.basename(d)
+            next unless File.directory?(d) && dir_name.match?(/.*\+.*/)
+            type, name = dir_name.split('+')
+            begin
+              a << Environment.new(Type[type], name, global)
+            rescue
+              nil
+            end
+          end
         end
-        env_name = [type.name,name].join('@')
-        env = self[env_name]
-        type.purge(name: name, global: env.global?)
       end
     end
 
@@ -134,6 +150,14 @@ module Env
 
     def activator
       type.activator(name, global)
+    end
+
+    def deactivator
+      type.deactivator(name, global)
+    end
+
+    def purge
+      type.purge(name: name, global: global?)
     end
   end
 end
