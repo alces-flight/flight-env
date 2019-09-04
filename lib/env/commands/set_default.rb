@@ -38,8 +38,7 @@ module Env
           if @args.empty?
             raise OptionParser::MissingArgument, "must specify environment when setting default"
           end
-          type, name = args[0].split('@')
-          e = Environment.set_default(type, name)
+          e = Environment.set_default(args[0])
           puts "Default environment set to: #{e}"
         end
       end

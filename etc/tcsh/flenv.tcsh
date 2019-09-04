@@ -26,10 +26,14 @@
 # ==============================================================================
 set command = `echo $args | cut -f1 -d' '`
 
+if (! $?flight_ENV_cmd ) then
+  set flight_ENV_cmd="$flight_ENV_root/bin/flenv"
+endif
+
 if ( "$command" == "activate" || "$command" == "deactivate" || "$command" == "switch" ) then
   setenv flight_ENV_eval true
   set tmpf = `mktemp /tmp/flenv.tcsh.XXXXXXX`
-  $flight_ENV_root/bin/flenv $args > $tmpf
+  $flight_ENV_cmd $args > $tmpf
   set _exit=$?
   if ($_exit == 0) then
     source $tmpf
@@ -38,9 +42,9 @@ if ( "$command" == "activate" || "$command" == "deactivate" || "$command" == "sw
   unset tmpf
   unsetenv flight_ENV_eval
 else
-  $flight_ENV_root/bin/flenv $args
+  $flight_ENV_cmd $args
   set _exit=$?
 endif
 
-unset args
+unset command args
 test 0 = $_exit

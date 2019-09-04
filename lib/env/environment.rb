@@ -73,9 +73,8 @@ module Env
         Config.save_user_data
       end
 
-      def set_default(type, name = DEFAULT)
-        name ||= DEFAULT
-        self[[type, name].join('@')].tap do |env|
+      def set_default(env_name)
+        self[env_name].tap do |env|
           Config.user_data.set(:default_environment, value: env.to_s)
           Config.save_user_data
         end
