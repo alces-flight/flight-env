@@ -25,5 +25,5 @@
 # https://github.com/alces-flight/flight-env
 # ==============================================================================
 module Env
-  VERSION = '1.0.0-dev'
+  VERSION = '1.1.0'
 end
