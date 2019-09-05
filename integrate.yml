@@ -33,6 +33,7 @@
     exit 1
   fi
   flexec bundle install --path=vendor --without development test
+  cp -R dist/* ${flight_ROOT:-/opt/flight}
 :command: |
   : '
   : NAME: env

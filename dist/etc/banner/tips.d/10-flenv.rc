@@ -1,0 +1,8 @@
+################################################################################
+##
+## Flight Environment
+## Copyright (c) 2019-present Alces Flight Ltd
+##
+################################################################################
+flight_TIP_command="flight env"
+flight_TIP_synopsis="manage software package environments"
