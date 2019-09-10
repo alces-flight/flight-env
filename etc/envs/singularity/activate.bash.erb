@@ -27,7 +27,7 @@
 export flight_ENV_orig_PATH="$PATH"
 export flight_ENV_orig_PS1="$PS1"
 
-PATH=<%= env_root %>/share/singularity/3.2.1/bin:$PATH
+PATH=<%= env_root %>/share/singularity/3.2.1/bin:<%= env_root %>/share/squashfs/4.3/bin:$PATH
 export SINGULARITY_CACHEDIR=<%= env_root %>/singularity+<%= env_name %>/cache
 export SINGULARITY_PULLDIR=<%= env_root %>/singularity+<%= env_name %>/images
 
@@ -39,4 +39,27 @@ if [[ $TERM == "xterm-256color" ]]; then
   PS1="\[\033[48;5;25;1;38;5;189m\]<singularity<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '\[\033[1;38;5;219m\]{+}\[\033[1;38;5;189m\]' : '' %>>\[\033[0m\] $PS1"
 else
   PS1="\[\033[1m\]<singularity<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '\[\033[7m\]{+}\[\033[0;1m\]' : '' %>>\[\033[0m\] $PS1"
+fi
+
+if [ ! -u "<%= env_root %>/share/singularity/3.2.1/libexec/singularity/bin/starter-suid" ]; then
+  mun=$(sysctl -n user.max_user_namespaces)
+  if [ "$mun" == "0" ]; then
+    red=$(tput setaf 1)
+    bold=$(tput bold)
+    reset=$(tput sgr0)
+    cat <<EOF
+${red}${bold}==========
+ WARNING!
+==========${reset}${bold}
+
+/proc/sys/user/max_user_namespaces is set to 0.  It must be set to a
+non-zero value to allow user-level access to Singularity container
+instance execution.
+
+Please refer to '<%= Env::CLI::PROGRAM_NAME %> info singularity' for more details.
+${reset}
+EOF
+    unset red bold reset
+  fi
+  unset mun
 fi
