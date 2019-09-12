@@ -39,15 +39,21 @@ module Env
           raise ActiveEnvironmentError, "environment currently active: #{target_env}"
         end
         prompt = TTY::Prompt.new
-        do_purge = @options.yes || prompt.yes?(
-          "Purge #{target_env.global? ? 'global ' : ''}environment #{pretty_name(target_env)}?"
-        ) do |q|
-          q.default false
+        begin
+          do_purge = @options.yes || prompt.yes?(
+                       "Purge #{target_env.global? ? 'global ' : ''}environment #{pretty_name(target_env)}?"
+                     ) do |q|
+            q.default false
+          end
+        rescue TTY::Prompt::ConversionError
+          # this prevents breakage when ESC is pressed during the prompt
+          # Refs: https://github.com/alces-flight/flight-env/issues/1
+          do_purge = false
         end
         if do_purge
           target_env.purge
         else
-          puts "#{target_env.global? ? 'Global e' : 'E'}Environment #{pretty_name(target_env)} not purged."
+          puts "#{target_env.global? ? 'Global e' : 'E'}nvironment #{pretty_name(target_env)} not purged."
         end
       end
     end

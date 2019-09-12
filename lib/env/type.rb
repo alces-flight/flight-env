@@ -98,7 +98,7 @@ module Env
       end
     rescue
       old_stderr, old_stdout = $stderr, $stdout
-      suppress_output { purge(name: name, global: global) }
+      suppress_output { purge(name: name, global: global) rescue nil }
       raise
     end
 
@@ -232,28 +232,32 @@ EOF
 
     def run_script(script, action, name, global)
       if File.exists?(script)
-        Bundler.with_clean_env do
-          run_fork do |wr|
-            wr.close_on_exec = false
-            setup_bash_funcs(ENV, wr.fileno)
-            log_file = File.join(
-              build_cache_path(global),
-              "#{self.name}+#{name}.#{action}.log"
-            )
-            FileUtils.mkdir_p(build_cache_path(global))
-            exec(
-              {
-                'flight_ENV_ROOT' => depot_path(global),
-                'flight_ENV_CACHE' => build_cache_path(global),
-              },
-              '/bin/bash',
-              '-x',
-              script,
-              name,
-              close_others: false,
-              [:out, :err] => [log_file ,'w']
-            )
+        if File.writable?(depot_path(global)) && File.writable?(build_cach_path(global))
+          Bundler.with_clean_env do
+            run_fork do |wr|
+              wr.close_on_exec = false
+              setup_bash_funcs(ENV, wr.fileno)
+              log_file = File.join(
+                build_cache_path(global),
+                "#{self.name}+#{name}.#{action}.log"
+              )
+              FileUtils.mkdir_p(build_cache_path(global))
+              exec(
+                {
+                  'flight_ENV_ROOT' => depot_path(global),
+                  'flight_ENV_CACHE' => build_cache_path(global),
+                },
+                '/bin/bash',
+                '-x',
+                script,
+                name,
+                close_others: false,
+                [:out, :err] => [log_file ,'w']
+              )
+            end
           end
+        else
+          raise EnvironmentOperationError, "unable to #{action == 'install' ? 'create' : action} #{global ? 'global ' : ''}environment #{self.name}@#{name} - permission denied"
         end
       else
         raise IncompleteTypeError, "no #{global ? 'global ' : ''}#{action} script provided for type: #{self.name}"
