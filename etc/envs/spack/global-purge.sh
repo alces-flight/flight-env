@@ -23,7 +23,7 @@
 #  https://opensource.org/licenses/EPL-2.0
 #
 # For more information on Flight Environment, please visit:
-# https://github.com/alces-flight/flight-env
+# https://github.com/openflighthpc/flight-env
 # ==============================================================================
 set -e
 
