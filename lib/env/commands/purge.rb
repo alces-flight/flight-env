@@ -22,7 +22,7 @@
 #  https://opensource.org/licenses/EPL-2.0
 #
 # For more information on Flight Environment, please visit:
-# https://github.com/alces-flight/flight-env
+# https://github.com/openflighthpc/flight-env
 # ==============================================================================
 require 'env/command'
 require 'env/environment'
@@ -47,7 +47,7 @@ module Env
           end
         rescue TTY::Prompt::ConversionError
           # this prevents breakage when ESC is pressed during the prompt
-          # Refs: https://github.com/alces-flight/flight-env/issues/1
+          # Refs: https://github.com/openflighthpc/flight-env/issues/1
           do_purge = false
         end
         if do_purge

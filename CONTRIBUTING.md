@@ -20,9 +20,9 @@ follow it in all your interactions with the project.
 ## Code of Conduct
 
 This project and everyone participating in it is governed by the
-[Alces Flight Code of Conduct](CODE_OF_CONDUCT.md). By participating,
+[OpenFlight Code of Conduct](CODE_OF_CONDUCT.md). By participating,
 you are expected to uphold this code. Please report unacceptable
-behaviour to [help@alces-flight.com](mailto:help@alces-flight.com).
+behaviour to [help@openflighthpc.org](mailto:help@openflighthpc.org).
 
 ## Help Others
 
@@ -31,7 +31,7 @@ You can help Flight Environment by helping others who use it and need support.
 ## Analyse Issues
 
 Analysing issue reports can be a lot of effort. Any help is welcome!
-Go to [the GitHub issue tracker](https://github.com/alces-flight/flight-env/issues?state=open)
+Go to [the GitHub issue tracker](https://github.com/openflighthpc/flight-env/issues?state=open)
 and find an open issue which needs additional work or a bugfix
 (e.g. issues labeled with "help wanted" or "bug").
 
@@ -47,7 +47,7 @@ only handle well-reported, actual bugs, so please follow the
 guidelines below.
 
 Once you have familiarised with the guidelines, you can go to the
-[GitHub issue tracker for Flight Environment](https://github.com/alces-flight/flight-env/issues/new)
+[GitHub issue tracker for Flight Environment](https://github.com/openflighthpc/flight-env/issues/new)
 to report the issue.
 
 ### Quick Checklist for Bug Reports
@@ -74,7 +74,7 @@ An issue that is about a real bug is closed as soon as the fix is committed.
 If you find a security issue, please act responsibly and report it not
 in the public issue tracker, but directly to us, so we can fix it
 before it can be exploited.  Please send the related information to
-[security@alces-flight.com](mailto:security@alces-flight.com).
+[security@openflighthpc.org](mailto:security@openflighthpc.org).
 
 ### Issue Reporting Disclaimer
 
@@ -117,7 +117,7 @@ applied to Flight Environment itself.
 
 In particular you need to agree to the Contributor License Agreement,
 which can be [found
-here](https://www.clahub.com/agreements/alces-flight/flight-env). This
+here](https://www.clahub.com/agreements/openflighthpc/flight-env). This
 applies to all contributors, including those contributing on behalf of
 a company. If you agree to its content, you simply have to click on
 the link posted by the CLA assistant available on the pull

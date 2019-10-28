@@ -22,7 +22,7 @@
 #  https://opensource.org/licenses/EPL-2.0
 #
 # For more information on Flight Environment, please visit:
-# https://github.com/alces-flight/flight-env
+# https://github.com/openflighthpc/flight-env
 # ==============================================================================
 require 'env/command'
 require 'env/type'
@@ -37,7 +37,7 @@ module Env
         type = Type[arg_type]
         options = {
           date: File.stat(type.info_file).ctime,
-          manual: 'Alces Flight Software Environments',
+          manual: 'OpenFlight Software Environments',
           organization: type.author || 'Alces Flight Ltd',
         }
         doc = Ronn::Document.new(type.info_file, options) do |f|
