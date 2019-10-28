@@ -184,7 +184,12 @@ cp -R ${flight_ENV_ROOT}/share/gridware/1.5.1/etc/depotskel/* "${depot}/el7/etc"
 export HOME=${HOME:-$(eval echo "~$(whoami)")}
 export ALCES_CONFIG_PATH="${flight_ENV_ROOT}/gridware+${name}/etc"
 export cw_DIST=el7
-cat <<RUBY | ruby
+if [ -x "${flight_ROOT}"/bin/ruby ]; then
+  RUBY="${flight_ROOT}"/bin/ruby
+else
+  RUBY="$(which ruby &>/dev/null)"
+fi
+cat <<RUBY | "${RUBY}"
 ENV['BUNDLE_GEMFILE'] ||= "${flight_ENV_ROOT}/share/gridware/1.5.1/Gemfile"
 \$: << "${flight_ENV_ROOT}/share/gridware/1.5.1/lib"
 
