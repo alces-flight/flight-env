@@ -99,29 +99,13 @@ if [ ! -d "${flight_ENV_ROOT}/share/gridware/repos/main" ]; then
   cat <<EOF > "${flight_ENV_ROOT}/share/gridware/repos/main/repo.yml"
 ################################################################################
 ##
-## Alces Clusterware - Gridware repository configuration
-## Copyright (c) 2012-2016 Alces Software Ltd
+## Gridware repository configuration
+## Copyright (c) 2019-present Alces Flight Ltd
 ##
 ################################################################################
 ---
-:source: https://github.com/alces-software/gridware-packages-main.git
+:source: https://github.com/alces-flight/gridware-packages.git
 :schema: 2
-EOF
-fi
-
-if [ ! -d "${flight_ENV_ROOT}/share/gridware/repos/volatile" ]; then
-  env_stage "Configuring repo: volatile"
-  mkdir -p "${flight_ENV_ROOT}/share/gridware/repos/volatile"
-  cat <<EOF > "${flight_ENV_ROOT}/share/gridware/repos/volatile/repo.yml"
-################################################################################
-##
-## Alces Clusterware - Gridware repository configuration
-## Copyright (c) 2012-2016 Alces Software Ltd
-##
-################################################################################
----
-:source: https://github.com/alces-software/packager-base.git
-:schema: 1
 EOF
 fi
 
@@ -152,7 +136,6 @@ cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/etc/gridware.yml
 :log_root: ${flight_ENV_CACHE}/gridware/logs/gridware+${name}
 :repo_paths:
  - ${flight_ENV_ROOT}/share/gridware/repos/main
- - ${flight_ENV_ROOT}/share/gridware/repos/volatile
 # - ${flight_ENV_ROOT}/share/gridware/repos/local
 :depotroot: ${flight_ENV_ROOT}/gridware+${name}
 :default_depot: local
