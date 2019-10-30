@@ -2,19 +2,17 @@
 
 ## SYNOPSIS
 
-Alces Gridware (Vintage Edition) provides access to a curated
-collection of scientific applications and libraries ready to install
-on your HPC environment, ensuring you've got absolutely everything you
-need and allowing your analysis to start as quickly as possible.
+Alces Gridware provides access to a curated collection of scientific
+applications and libraries ready to install on your HPC environment,
+ensuring you've got absolutely everything you need and allowing your
+analysis to start as quickly as possible.
 
 Covering many fields of scientific research, from fluid dynamics to
 molecular dynamics, bioinformatics to statistics, machine learning to
 electron microscopy, Gridware provides a comprehensive research
 toolkit.
 
-Gridware allows you to install from a selection of preconfigured
-software depots providing quick batch deployment of groups of popular
-applications, or the freedom to install your own selection of key
+Gridware allows you the freedom to install your own selection of key
 applications -- with all dependencies satisfied and appearing
 automatically alongside your selections.
 
@@ -24,15 +22,12 @@ Gridware has got you covered. And for those who want to get started
 quickly you can install many applications from one of our prebuilt
 binary repositories.
 
-Alces Gridware (Vintage Edition) is not actively supported and has
-been superseded by Flight Kit (see `kit`).
-
 ## ENVIRONMENT CREATION
 
-This environment provides Gridware (Vintage Edition) v1.5.1. It is
-possible to create either user-level Gridware environments or, if you
-have write access to the global environment tree, to create
-system-wide Gridware environments.
+This environment provides Gridware v1.5.2. It is possible to create
+either user-level Gridware environments or, if you have write access
+to the global environment tree, to create system-wide Gridware
+environments.
 
 ### Personal Environment
 
