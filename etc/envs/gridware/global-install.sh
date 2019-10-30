@@ -109,6 +109,17 @@ if [ ! -d "${flight_ENV_ROOT}/share/gridware/repos/main" ]; then
 EOF
 fi
 
+binary_placeholder="${flight_ENV_gridware_binary_placeholder:-/opt/apps/flight/env/u}"
+if [ -d "${binary_placeholder}" ]; then
+  if [ "$(echo -n "${binary_placeholder}" | wc -c)" != "22" ]; then
+    binary_enabled=false
+  else
+    binary_enabled=true
+  fi
+else
+  binary_enabled=false
+fi
+
 env_stage "Creating environment (gridware@${name})"
 mkdir -p ${flight_ENV_ROOT}/gridware+${name}/depots
 mkdir -p ${flight_ENV_ROOT}/gridware+${name}/etc
@@ -119,11 +130,13 @@ cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/gridware.bash.rc
 module use ${flight_ENV_ROOT}/gridware+${name}/local/el7/etc/modules
 export ALCES_CONFIG_PATH="${flight_ENV_ROOT}/gridware+${name}/etc"
 export cw_DIST=el7
+export flight_GRIDWARE_binary_enabled=${binary_enabled}
 EOF
 cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/gridware.tcsh.rc
 module use ${flight_ENV_ROOT}/gridware+${name}/local/el7/etc/modules
 setenv ALCES_CONFIG_PATH "${flight_ENV_ROOT}/gridware+${name}/etc"
 setenv cw_DIST el7
+setenv flight_GRIDWARE_binary_enabled ${binary_enabled}
 EOF
 cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/etc/gridware.yml
 ################################################################################
@@ -144,7 +157,7 @@ cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/etc/gridware.yml
 :fallback_package_url: https://s3-eu-west-1.amazonaws.com/alces-gridware-eu-west-1/upstream
 :default_binary_url: https://s3-eu-west-1.amazonaws.com/alces-gridware-eu-west-1/dist
 :fetch_timeout: 10
-:prefer_binary: false
+:prefer_binary: ${binary_enabled}
 :use_default_params: false
 :update_period: 3
 :last_update_filename: .last_update
@@ -163,6 +176,12 @@ cd ${flight_ENV_ROOT}/gridware+${name}
 ln -snf "${depot}" "${dname}"
 mkdir -p "${depot}/el7/pkg" "${depot}/el7/etc"
 cp -R ${flight_ENV_ROOT}/share/gridware/1.5.2/etc/depotskel/* "${depot}/el7/etc"
+
+if [ "${binary_enabled}" == "true" ]; then
+   udepot="$(echo ${binary_placeholder}/$(uuid -v4 | cut -c1-6))"
+   ln -snf "${udepot}" "${depot}"/.gridware-userspace
+   ln -snf "${depot}" "${udepot}"
+fi
 
 export HOME=${HOME:-$(eval echo "~$(whoami)")}
 export ALCES_CONFIG_PATH="${flight_ENV_ROOT}/gridware+${name}/etc"
