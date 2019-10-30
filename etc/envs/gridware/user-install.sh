@@ -173,6 +173,12 @@ cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/etc/params.yml
 'apps/example/1.0.1':
   :optimize: false
 EOF
+if sudo -ln /bin/bash &>/dev/null; then
+  cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/etc/whitelist.yml
+:users:
+- $(id -un)
+EOF
+fi
 
 depot="$(echo "${flight_ENV_ROOT}/gridware+${name}/depots/$(uuid -v4 | cut -f1 -d'-')")"
 dname="local"
