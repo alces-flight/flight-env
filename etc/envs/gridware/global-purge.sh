@@ -37,4 +37,9 @@ if [ -z "$name" ]; then
 fi
 
 env_stage "Deleting environment tree (gridware@${name})"
+shopt -s nullglob
+for a in ${flight_ENV_ROOT}/gridware+${name}/depots/*/.gridware-userspace; do
+  rm -f $(readlink "$a")
+done
+shopt -u nullglob
 rm -rf ${flight_ENV_ROOT}/gridware+${name}

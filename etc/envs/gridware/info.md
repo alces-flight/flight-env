@@ -1,4 +1,4 @@
-# gridware(7) -- Tool for installing and managing curated scientific applications and libraries.
+# gridware(7) -- Tool for installing and managing scientific applications and libraries.
 
 ## SYNOPSIS
 
@@ -12,9 +12,7 @@ molecular dynamics, bioinformatics to statistics, machine learning to
 electron microscopy, Gridware provides a comprehensive research
 toolkit.
 
-Gridware allows you to install from a selection of preconfigured
-software depots providing quick batch deployment of groups of popular
-applications, or the freedom to install your own selection of key
+Gridware allows you the freedom to install your own selection of key
 applications -- with all dependencies satisfied and appearing
 automatically alongside your selections.
 
@@ -26,7 +24,7 @@ binary repositories.
 
 ## ENVIRONMENT CREATION
 
-This environment provides Gridware v1.5.1. It is possible to create
+This environment provides Gridware v1.5.2. It is possible to create
 either user-level Gridware environments or, if you have write access
 to the global environment tree, to create system-wide Gridware
 environments.

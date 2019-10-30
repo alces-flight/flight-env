@@ -24,7 +24,7 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-flight_ENV_vars=(SINGULARITY_CACHEDIR SINGULARITY_PULLDIR)
+flight_ENV_vars=(SINGULARITY_CACHEDIR SINGULARITY_PULLDIR SINGULARITY_LOCALCACHEDIR)
 for flight_ENV_iter in "${flight_ENV_vars[@]}"; do
   unset $flight_ENV_iter
 done

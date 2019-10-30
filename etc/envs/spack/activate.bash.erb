@@ -29,6 +29,8 @@ export flight_ENV_orig_PS1="$PS1"
 
 source <%= env_root %>/spack+<%= env_name %>/share/spack/setup-env.sh
 
+export -f module
+
 export flight_ENV_active=spack@<%= env_name %>
 export flight_ENV_scope=<%= env_global ? 'global' : 'user' %>
 export flight_ENV_dir=<%= env_root %>/spack+<%= env_name %>

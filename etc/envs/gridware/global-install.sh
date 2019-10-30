@@ -78,17 +78,17 @@ if [ ! -d "${flight_ENV_ROOT}"/share/modules/3.2.10 ]; then
   touch ${flight_ENV_ROOT}/share/modules/3.2.10/Modules/init/.modulespath
 fi
 
-if [ ! -d "${flight_ENV_ROOT}/share/gridware/1.5.1" ]; then
-  if [ ! -f gridware-legacy-1.5.1.tar.gz ]; then
+if [ ! -d "${flight_ENV_ROOT}/share/gridware/1.5.2" ]; then
+  if [ ! -f gridware-legacy-1.5.2.tar.gz ]; then
     env_stage "Fetching prerequisite (gridware)"
-    wget https://github.com/alces-flight/gridware-legacy/archive/master.tar.gz -O gridware-legacy-1.5.1.tar.gz
+    wget https://github.com/alces-flight/gridware-legacy/archive/master.tar.gz -O gridware-legacy-1.5.2.tar.gz
   fi
   env_stage "Extracting prerequisite (gridware)"
-  tar xvf gridware-legacy-1.5.1.tar.gz
+  tar xvf gridware-legacy-1.5.2.tar.gz
   env_stage "Installing prerequisite (gridware)"
-  mkdir -p "${flight_ENV_ROOT}/share/gridware/1.5.1"
-  cp -R gridware-legacy-master/* "${flight_ENV_ROOT}/share/gridware/1.5.1"
-  cd ${flight_ENV_ROOT}/share/gridware/1.5.1
+  mkdir -p "${flight_ENV_ROOT}/share/gridware/1.5.2"
+  cp -R gridware-legacy-master/* "${flight_ENV_ROOT}/share/gridware/1.5.2"
+  cd ${flight_ENV_ROOT}/share/gridware/1.5.2
   export PKG_CONFIG_PATH=/usr/lib64/pkgconfig
   /opt/flight/bin/flexec bundle install --path=vendor --without=development --without=test --local
 fi
@@ -99,30 +99,25 @@ if [ ! -d "${flight_ENV_ROOT}/share/gridware/repos/main" ]; then
   cat <<EOF > "${flight_ENV_ROOT}/share/gridware/repos/main/repo.yml"
 ################################################################################
 ##
-## Alces Clusterware - Gridware repository configuration
-## Copyright (c) 2012-2016 Alces Software Ltd
+## Gridware repository configuration
+## Copyright (c) 2019-present Alces Flight Ltd
 ##
 ################################################################################
 ---
-:source: https://github.com/alces-software/gridware-packages-main.git
+:source: https://github.com/alces-flight/gridware-packages.git
 :schema: 2
 EOF
 fi
 
-if [ ! -d "${flight_ENV_ROOT}/share/gridware/repos/volatile" ]; then
-  env_stage "Configuring repo: volatile"
-  mkdir -p "${flight_ENV_ROOT}/share/gridware/repos/volatile"
-  cat <<EOF > "${flight_ENV_ROOT}/share/gridware/repos/volatile/repo.yml"
-################################################################################
-##
-## Alces Clusterware - Gridware repository configuration
-## Copyright (c) 2012-2016 Alces Software Ltd
-##
-################################################################################
----
-:source: https://github.com/alces-software/packager-base.git
-:schema: 1
-EOF
+binary_placeholder="${flight_ENV_gridware_binary_placeholder:-/opt/apps/flight/env/u}"
+if [ -d "${binary_placeholder}" ]; then
+  if [ "$(echo -n "${binary_placeholder}" | wc -c)" != "22" ]; then
+    binary_enabled=false
+  else
+    binary_enabled=true
+  fi
+else
+  binary_enabled=false
 fi
 
 env_stage "Creating environment (gridware@${name})"
@@ -135,11 +130,13 @@ cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/gridware.bash.rc
 module use ${flight_ENV_ROOT}/gridware+${name}/local/el7/etc/modules
 export ALCES_CONFIG_PATH="${flight_ENV_ROOT}/gridware+${name}/etc"
 export cw_DIST=el7
+export flight_GRIDWARE_binary_enabled=${binary_enabled}
 EOF
 cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/gridware.tcsh.rc
 module use ${flight_ENV_ROOT}/gridware+${name}/local/el7/etc/modules
 setenv ALCES_CONFIG_PATH "${flight_ENV_ROOT}/gridware+${name}/etc"
 setenv cw_DIST el7
+setenv flight_GRIDWARE_binary_enabled ${binary_enabled}
 EOF
 cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/etc/gridware.yml
 ################################################################################
@@ -152,7 +149,6 @@ cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/etc/gridware.yml
 :log_root: ${flight_ENV_CACHE}/gridware/logs/gridware+${name}
 :repo_paths:
  - ${flight_ENV_ROOT}/share/gridware/repos/main
- - ${flight_ENV_ROOT}/share/gridware/repos/volatile
 # - ${flight_ENV_ROOT}/share/gridware/repos/local
 :depotroot: ${flight_ENV_ROOT}/gridware+${name}
 :default_depot: local
@@ -161,7 +157,7 @@ cat <<EOF > ${flight_ENV_ROOT}/gridware+${name}/etc/gridware.yml
 :fallback_package_url: https://s3-eu-west-1.amazonaws.com/alces-gridware-eu-west-1/upstream
 :default_binary_url: https://s3-eu-west-1.amazonaws.com/alces-gridware-eu-west-1/dist
 :fetch_timeout: 10
-:prefer_binary: false
+:prefer_binary: ${binary_enabled}
 :use_default_params: false
 :update_period: 3
 :last_update_filename: .last_update
@@ -179,7 +175,13 @@ dname="local"
 cd ${flight_ENV_ROOT}/gridware+${name}
 ln -snf "${depot}" "${dname}"
 mkdir -p "${depot}/el7/pkg" "${depot}/el7/etc"
-cp -R ${flight_ENV_ROOT}/share/gridware/1.5.1/etc/depotskel/* "${depot}/el7/etc"
+cp -R ${flight_ENV_ROOT}/share/gridware/1.5.2/etc/depotskel/* "${depot}/el7/etc"
+
+if [ "${binary_enabled}" == "true" ]; then
+   udepot="$(echo ${binary_placeholder}/$(uuid -v4 | cut -c1-6))"
+   ln -snf "${udepot}" "${depot}"/.gridware-userspace
+   ln -snf "${depot}" "${udepot}"
+fi
 
 export HOME=${HOME:-$(eval echo "~$(whoami)")}
 export ALCES_CONFIG_PATH="${flight_ENV_ROOT}/gridware+${name}/etc"
@@ -190,8 +192,8 @@ else
   RUBY="$(which ruby &>/dev/null)"
 fi
 cat <<RUBY | "${RUBY}"
-ENV['BUNDLE_GEMFILE'] ||= "${flight_ENV_ROOT}/share/gridware/1.5.1/Gemfile"
-\$: << "${flight_ENV_ROOT}/share/gridware/1.5.1/lib"
+ENV['BUNDLE_GEMFILE'] ||= "${flight_ENV_ROOT}/share/gridware/1.5.2/Gemfile"
+\$: << "${flight_ENV_ROOT}/share/gridware/1.5.2/lib"
 
 require 'rubygems'
 require 'bundler'

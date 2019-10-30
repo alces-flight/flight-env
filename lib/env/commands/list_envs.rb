@@ -36,11 +36,15 @@ module Env
         Environment.global_only = true if @options.global
         cmd = self
         if STDOUT.tty?
-          Table.emit do |t|
-            headers 'Name', 'Scope'
-            Environment.each do |e|
-              row cmd.pretty_name(e),
-                  e.global? ? 'global' : 'user'
+          if Environment.all.empty?
+            puts "No configured environments."
+          else
+            Table.emit do |t|
+              headers 'Name', 'Scope'
+              Environment.each do |e|
+                row cmd.pretty_name(e),
+                    e.global? ? 'global' : 'user'
+              end
             end
           end
         else

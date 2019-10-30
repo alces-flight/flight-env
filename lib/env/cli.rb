@@ -89,15 +89,15 @@ module Env
 
     command :avail do |c|
       cli_syntax(c)
-      c.description = "Show available application environments"
-      c.option '-g', '--global', 'Consider global application environments only.'
-      c.action Commands, :list_envs
+      c.description = "Show available application environment types"
+      c.action Commands, :list_types
     end
 
     command :list do |c|
       cli_syntax(c)
-      c.description = "List application environment types"
-      c.action Commands, :list_types
+      c.description = "List configured application environments"
+      c.option '-g', '--global', 'Consider global application environments only.'
+      c.action Commands, :list_envs
     end
 
     command :create do |c|
