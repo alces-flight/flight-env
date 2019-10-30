@@ -30,6 +30,9 @@ export flight_ENV_orig_PS1="$PS1"
 PATH=<%= env_root %>/share/singularity/3.2.1/bin:<%= env_root %>/share/squashfs/4.3/bin:$PATH
 export SINGULARITY_CACHEDIR=<%= env_root %>/singularity+<%= env_name %>/cache
 export SINGULARITY_PULLDIR=<%= env_root %>/singularity+<%= env_name %>/images
+export SINGULARITY_LOCALCACHEDIR=/tmp
+
+mkdir -p $SINGULARITY_CACHEDIR $SINGULARITY_PULLDIR
 
 export flight_ENV_active=singularity@<%= env_name %>
 export flight_ENV_scope=<%= env_global ? 'global' : 'user' %>
