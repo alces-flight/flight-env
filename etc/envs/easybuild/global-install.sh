@@ -105,4 +105,10 @@ if [ ! -f bootstrap_eb.py ]; then
 fi
 
 env_stage "Bootstrapping EasyBuild environment (easybuild@${name})"
-python bootstrap_eb.py ${flight_ENV_ROOT}/easybuild+${name}
+if [ "$UID" == "0" ]; then
+  mkdir "${flight_ENV_ROOT}/easybuild+${name}"
+  chown nobody "${flight_ENV_ROOT}/easybuild+${name}"
+  su -s /bin/bash nobody -c "python bootstrap_eb.py ${flight_ENV_ROOT}/easybuild+${name}"
+else
+  python bootstrap_eb.py ${flight_ENV_ROOT}/easybuild+${name}
+fi
