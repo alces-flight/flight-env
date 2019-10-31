@@ -94,6 +94,10 @@ module Env
         env = type.create(name: name, global: global)
       end
 
+      def all
+        @all ||= user_envs + global_envs
+      end
+
       private
       def fetch(k, candidates = envs)
         candidates.find{|e| e.to_s == k}
@@ -105,10 +109,6 @@ module Env
 
       def global_envs
         @global_envs ||= envs_for(Config.global_depot_path, true)
-      end
-
-      def all
-        @all ||= user_envs + global_envs
       end
 
       def envs
