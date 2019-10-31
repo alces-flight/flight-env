@@ -104,7 +104,7 @@ if [ ! -d "${flight_ENV_ROOT}/share/gridware/repos/main" ]; then
 ##
 ################################################################################
 ---
-:source: https://github.com/alces-flight/gridware-packages.git
+:source: https://github.com/alces-software/gridware-packages-main.git
 :schema: 2
 EOF
 fi
