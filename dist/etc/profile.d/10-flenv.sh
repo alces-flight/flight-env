@@ -45,7 +45,7 @@ flight() {
       export FLIGHT_PROGRAM_NAME="flight env"
       flenv "$@"
   else
-      ${flight_ROOT}/bin/flight "$@"
+      flexec flight "$@"
   fi
 }
 
