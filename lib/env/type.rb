@@ -235,7 +235,7 @@ EOF
         FileUtils.mkdir_p(build_cache_path(global)) rescue nil
         FileUtils.mkdir_p(depot_path(global)) rescue nil
         if File.writable?(depot_path(global)) && File.writable?(build_cache_path(global))
-          with_unbundled_env do
+          with_clean_env do
             run_fork do |wr|
               wr.close_on_exec = false
               setup_bash_funcs(ENV, wr.fileno)
@@ -276,9 +276,9 @@ EOF
       $stderr.reopen(original_stderr)
     end
 
-    def with_unbundled_env(&block)
-      if Kernel.const_defined?(:OpenFlight) && OpenFlight.respond_to?(:with_unbundled_env)
-        OpenFlight.with_unbundled_env { block.call }
+    def with_clean_env(&block)
+      if Kernel.const_defined?(:OpenFlight) && OpenFlight.respond_to?(:with_standard_env)
+        OpenFlight.with_standard_env { block.call }
       else
         msg = Bundler.respond_to?(:with_unbundled_env) ? :with_unbundled_env : :with_clean_env
         Bundler.__send__(msg) { block.call }

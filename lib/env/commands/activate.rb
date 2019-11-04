@@ -49,7 +49,7 @@ module Env
             raise EvaluatorError, "unrecognized shell: #{Shell.type_name}"
           elsif options.subshell
             puts "Activating environment #{pretty_name(target_env)}"
-            Bundler.with_clean_env do
+            with_clean_env do
               exec(
                 shell.env.merge('flight_ENV_subshell_env' => @args.first),
                 [shell.path,'flight-env'],
@@ -62,6 +62,16 @@ module Env
           end
         end
         puts target_env.activator
+      end
+
+      private
+      def with_clean_env(&block)
+        if Kernel.const_defined?(:OpenFlight) && OpenFlight.respond_to?(:with_standard_env)
+          OpenFlight.with_standard_env { block.call }
+        else
+          msg = Bundler.respond_to?(:with_unbundled_env) ? :with_unbundled_env : :with_clean_env
+          Bundler.__send__(msg) { block.call }
+        end
       end
     end
   end
