@@ -37,4 +37,4 @@ if [ -z "$name" ]; then
 fi
 
 env_stage "Deleting environment tree (singularity@${name})"
-rm -rf ${flight_ENV_ROOT}/singlarity+${name}
+rm -rf ${flight_ENV_ROOT}/singularity+${name}
