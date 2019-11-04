@@ -38,6 +38,7 @@ module Env
         active_env = Environment.active
         target_env = Environment[args[0]]
         if active_env == target_env
+          return if ENV.fetch('flight_MODE','interactive') == 'batch'
           raise ActiveEnvironmentError, "environment already active: #{active_env}"
         elsif !active_env.nil?
           raise ActiveEnvironmentError, "existing active environment detected: #{active_env}"
