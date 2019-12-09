@@ -58,7 +58,8 @@ module Env
               Dir[File.join(Config.types_path,'*')].sort.each do |d|
                 begin
                   md = YAML.load_file(File.join(d,'metadata.yml'))
-                  h[md[:name].to_sym] = Type.new(md, d)
+                  t = Type.new(md, d)
+                  h[md[:name].to_sym] = t if t.supports_host_arch?
                 rescue
                   nil
                 end
@@ -72,12 +73,22 @@ module Env
     attr_reader :summary
     attr_reader :url
     attr_reader :author
+    attr_reader :arch
 
     def initialize(md, dir)
       @name = md[:name]
       @summary = md[:summary]
       @url = md[:url]
       @dir = dir
+      @arch = md[:arch] || []
+    end
+
+    def supports_host_arch?
+      if @arch.empty?
+        true
+      else
+        @arch.include?(RbConfig::CONFIG['host_cpu'])
+      end
     end
 
     def info_file

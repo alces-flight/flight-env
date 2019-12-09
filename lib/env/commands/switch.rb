@@ -41,6 +41,7 @@ module Env
           puts target_env.activator
           return
         elsif active_env == target_env
+          return if ENV.fetch('flight_MODE','interactive') == 'batch'
           raise ActiveEnvironmentError, "environment already active: #{active_env}"
         end
         assert_evaluatable
