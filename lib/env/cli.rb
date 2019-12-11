@@ -36,7 +36,7 @@ module Env
     extend Commander::Delegates
     program :application, "Flight Environment"
     program :name, PROGRAM_NAME
-    program :version, "Release 2019.1 (v#{Env::VERSION})"
+    program :version, "v#{Env::VERSION}"
     program :description, 'Manage and access HPC application environments.'
     program :help_paging, false
     default_command :help
