@@ -18,7 +18,11 @@ unset sourcechk
 
 set flight_ENV_cmd="${flight_ROOT}/bin/flexec ruby $flight_ENV_root/bin/flenv"
 
-if ( ! $?flight_ENV_active ) then
+if ( ! $?flight_SYSTEM_start ) then
+  set flight_SYSTEM_start=false
+endif
+
+if ( ! $?flight_ENV_active && ( $?loginsh || $?prompt || "$flight_SYSTEM_start" == "true" ) ) then
   # Activate default environment
   set flight_ENV_default=`flenv show-default --empty-if-unset`
   if ( "$flight_ENV_default" != "" ) then

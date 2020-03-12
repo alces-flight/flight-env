@@ -49,7 +49,12 @@ flight() {
   fi
 }
 
-if [ -z "${flight_ENV_active}" -a "${-#*i}" != "$-" ]; then
+if [ -z "${flight_ENV_active}" ] && \
+    (
+        shopt -q login_shell || \
+            [ "${-#*i}" != "$-" ] || \
+            [ "${flight_SYSTEM_start}" == "true" ]
+    ); then
   # Activate default environment
   flight_ENV_default="$(flenv show-default --empty-if-unset)"
   if [ "$flight_ENV_default" ]; then
