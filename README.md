@@ -10,7 +10,33 @@ managed with the ability to switch between them as required.
 
 ## Installation
 
-TBC.
+### From the OpenFlight `yum` repository
+
+The installation of Flight Environment and the Flight User Suite is documented in [the OpenFlight Documentation](https://use.openflighthpc.org/en/latest/installing-user-suite/install.html#installing-flight-user-suite).
+
+### Manual Installation
+
+While manual installation is not normally required or recommended, if you're not using Enterprise Linux or want to set things up yourself directly from the repository, you can do so by following the steps below.
+
+#### Prerequisites
+
+You will need a functional Ruby 2.5+ environment (one installed via RVM or similar works well) along with the Bundler tool.
+
+#### Steps
+
+1. Create the installation directory and clone repository
+
+    ```bash
+    mkdir -p /opt/flight/opt/
+    git clone https://github.com/openflighthpc/flight-env /opt/flight/opt/env
+    ```
+
+2. Install gems
+   
+    ```bash
+    cd /opt/flight/opt/env
+    bundle install
+    ```
 
 ## Configuration
 
