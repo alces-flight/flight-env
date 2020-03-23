@@ -46,23 +46,29 @@ mkdir -p ${flight_ENV_ROOT}
 # the way.
 MODULEPATH=""
 
+if [ -f /etc/redhat-release ] && grep -q 'release 8' /etc/redhat-release; then
+  distro=rhel8
+fi
+
 # build LUA
 env_stage "Verifying prerequisites"
-# build LUA
-if [ ! -f lua-5.1.4.9.tar.bz2 ]; then
-  env_stage "Fetching prerequisite (lua)"
-  wget https://sourceforge.net/projects/lmod/files/lua-5.1.4.9.tar.bz2
-  env_stage "Extracting prerequisite (lua)"
-  tar xjf lua-5.1.4.9.tar.bz2
-  cd lua-5.1.4.9
-  env_stage "Building prerequisite (lua)"
-  ./configure --with-static=yes --prefix=${flight_ENV_ROOT}/share/lua/5.1.4.9
-  make
-  env_stage "Installing prerequisite (lua)"
-  make install
-  cd ..
+if [ "$distro" != "rhel8" ]; then
+  # build LUA
+  if [ ! -f lua-5.1.4.9.tar.bz2 ]; then
+    env_stage "Fetching prerequisite (lua)"
+    wget https://sourceforge.net/projects/lmod/files/lua-5.1.4.9.tar.bz2
+    env_stage "Extracting prerequisite (lua)"
+    tar xjf lua-5.1.4.9.tar.bz2
+    cd lua-5.1.4.9
+    env_stage "Building prerequisite (lua)"
+    ./configure --with-static=yes --prefix=${flight_ENV_ROOT}/share/lua/5.1.4.9
+    make
+    env_stage "Installing prerequisite (lua)"
+    make install
+    cd ..
+  fi
+  PATH=${flight_ENV_ROOT}/share/lua/5.1.4.9/bin:$PATH
 fi
-PATH=${flight_ENV_ROOT}/share/lua/5.1.4.9/bin:$PATH
 
 # build Tcl
 if [ ! -d ${flight_ENV_ROOT}/share/tcl/8.6.9 ]; then
@@ -106,4 +112,11 @@ if [ ! -f bootstrap_eb.py ]; then
 fi
 
 env_stage "Bootstrapping EasyBuild environment (easybuild@${name})"
-python bootstrap_eb.py ${flight_ENV_ROOT}/easybuild+${name}
+
+if ! which python &>/dev/null; then
+  PYTHON=python3
+else
+  PYTHON=python
+fi
+
+$PYTHON bootstrap_eb.py ${flight_ENV_ROOT}/easybuild+${name}
