@@ -51,4 +51,7 @@ env_stage "Extracting Spack hierarchy (spack@${name})"
 tar -C ${flight_ENV_ROOT}/spack+${name} -xzf spack-v0.12.1.tar.gz --strip-components=1
 cd ${flight_ENV_ROOT}/spack+${name}
 env_stage "Bootstrapping Spack environment (spack@${name})"
+if ! which python &>/dev/null; then
+  sed -i -e 's,#!/usr/bin/env python$,#!/usr/bin/env python3,g' bin/spack
+fi
 bin/spack bootstrap
