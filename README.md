@@ -40,11 +40,25 @@ You will need a functional Ruby 2.5+ environment (one installed via RVM or simil
 
 ## Configuration
 
-TBC.
+Making changes to the default configuration is optional and can be achieved by creating a `config.yml` file in the `etc/` subdirectory
+of the tool.  A `config.yml.ex` file is distributed which outlines all the configuration values available:
+
+ * `global_depot_path` - This setting defines where global ecosystems should be installed, it is recommended that this be somewhere accessible by all users on the system (defaults to `/opt/flight/var/lib/env`)
+ * `global_build_cache_path` - This setting defines where global ecosystems are built (the location of build logs, dependencies and other information on the build) (defaults to `/opt/flight/var/cache/env/build`)
 
 ## Operation
 
-TBC.
+Display the range of available software ecosystems using the `avail` command.
+
+Create an ecosystem with the `create` command, providing the argument of an ecosystem from the list above. 
+
+Activate an ecosystem using the `activate` command, this will expose the ecosystem's commands to the shell. Exit the ecosystem using the `deactivate` command.
+
+Show the configured ecosystems using the `list` command.
+
+Remove an ecosystem using the `purge` command.
+
+Further information and examples of the `env` command are available in [the OpenFlight documentation](https://use.openflighthpc.org/en/latest/working-with-user-suite/flight-environment.html).
 
 # Contributing
 
