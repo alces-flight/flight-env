@@ -37,6 +37,17 @@ require_relative 'patches/unicode-display_width'
 module Env
   class Type
     DEFAULT = 'default'
+    FUNC_DELIMITER = begin
+                       major, minor, patch =
+                                     IO.popen("/bin/bash -c 'echo $BASH_VERSION'")
+                                       .read.split('.')[0..2]
+                                       .map(&:to_i)
+                       (
+                         major > 4 ||
+                         major == 4 && minor > 3 ||
+                         major == 4 && minor == 3 && patch >= 27
+                       ) ? '%%' : '()'
+                     end
 
     class << self
       def each(&block)
@@ -225,7 +236,7 @@ module Env
     end
 
     def setup_bash_funcs(h, fileno)
-      h['BASH_FUNC_flight_env_comms()'] = <<EOF
+      h["BASH_FUNC_flight_env_comms#{FUNC_DELIMITER}"] = <<EOF
 () { local msg=$1
  shift
  if [ "$1" ]; then
@@ -235,8 +246,8 @@ module Env
  fi
 }
 EOF
-      h['BASH_FUNC_env_err()'] = "() { flight_env_comms ERR \"$@\"\n}"
-      h['BASH_FUNC_env_stage()'] = "() { flight_env_comms STAGE \"$@\"\n}"
+      h["BASH_FUNC_env_err#{FUNC_DELIMITER}"] = "() { flight_env_comms ERR \"$@\"\n}"
+      h["BASH_FUNC_env_stage#{FUNC_DELIMITER}"] = "() { flight_env_comms STAGE \"$@\"\n}"
 #      h['BASH_FUNC_env_cat()'] = "() { flight_env_comms\n}"
 #      h['BASH_FUNC_env_echo()'] = "() { flight_env_comms DATA \"$@\"\necho \"$@\"\n}"
     end
