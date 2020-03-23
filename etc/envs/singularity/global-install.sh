@@ -43,17 +43,17 @@ cd ${flight_ENV_CACHE}/build
 # XXX - verify that /proc/sys/user/max_user_namespaces is greater than 0
 
 env_stage "Verifying prerequisites"
-if [ ! -f squashfs4.3.tar.gz ]; then
+if [ ! -f squashfs4.4.tar.gz ]; then
   env_stage "Fetching prerequisite (squashfs)"
-  wget https://sourceforge.net/projects/squashfs/files/squashfs/squashfs4.3/squashfs4.3.tar.gz
+  wget https://sourceforge.net/projects/squashfs/files/squashfs/squashfs4.4/squashfs4.4.tar.gz
   env_stage "Extracting prerequisite (squashfs)"
-  tar xzf squashfs4.3.tar.gz
+  tar xzf squashfs4.4.tar.gz
   env_stage "Building prerequisite (squashfs)"
-  cd squashfs4.3/squashfs-tools
+  cd squashfs4.4/squashfs-tools
   make
   env_stage "Installing prerequisite (squashfs)"
-  mkdir -p ${flight_ENV_ROOT}/share/squashfs/4.3/bin
-  mv mksquashfs unsquashfs ${flight_ENV_ROOT}/share/squashfs/4.3/bin
+  mkdir -p ${flight_ENV_ROOT}/share/squashfs/4.4/bin
+  mv mksquashfs unsquashfs ${flight_ENV_ROOT}/share/squashfs/4.4/bin
   cd ../..
 fi
 
@@ -86,7 +86,7 @@ if [ ! -f singularity-3.2.1.tar.gz ]; then
   make
   env_stage "Installing prerequisite (singularity)"
   make install
-  sed -e "s,# mksquashfs path =.*,mksquashfs path = ${flight_ENV_ROOT}/share/squashfs/4.3/bin/mksquashfs,g" \
+  sed -e "s,# mksquashfs path =.*,mksquashfs path = ${flight_ENV_ROOT}/share/squashfs/4.4/bin/mksquashfs,g" \
       -i "${flight_ENV_ROOT}"/share/singularity/3.2.1/etc/singularity/singularity.conf
 fi
 

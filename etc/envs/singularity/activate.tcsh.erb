@@ -27,7 +27,7 @@
 set flight_ENV_orig_PATH = "$PATH"
 set flight_ENV_orig_prompt = "$prompt"
 
-setenv PATH <%= env_root %>/share/singularity/3.2.1/bin:<%= env_root %>/share/squashfs/4.3/bin:$PATH
+setenv PATH <%= env_root %>/share/singularity/3.2.1/bin:<%= env_root %>/share/squashfs/4.4/bin:$PATH
 setenv SINGULARITY_CACHEDIR <%= env_root %>/singularity+<%= env_name %>/cache
 setenv SINGULARITY_PULLDIR <%= env_root %>/singularity+<%= env_name %>/images
 setenv SINGULARITY_LOCALCACHEDIR /tmp
