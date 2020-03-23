@@ -58,7 +58,7 @@ Show the configured ecosystems using the `list` command.
 
 Remove an ecosystem using the `purge` command.
 
-Further information and examples of the `env` command are available in [the OpenFlight documentation](https://use.openflighthpc.org/en/latest/working-with-user-suite/flight-environment.html).
+See the `help` command for further details and information about other commands. Further information and examples of the `env` command are available in [the OpenFlight documentation](https://use.openflighthpc.org/en/latest/working-with-user-suite/flight-environment.html).
 
 # Contributing
 
