@@ -29,9 +29,9 @@ export flight_ENV_orig_PS1="$PS1"
 export flight_ENV_orig_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
 
 export LD_LIBRARY_PATH=<%= env_root %>/share/tcl/8.6.9/lib:$LD_LIBRARY_PATH
-export MODULERCFILE=<%= env_root %>/share/gridware/1.5.2/etc/modulerc
-export MODULES_ALCES_TCL=<%= env_root %>/share/gridware/1.5.2/etc/modules-alces.tcl
-export flight_GRIDWARE_root=<%= env_root %>/share/gridware/1.5.2
+export MODULERCFILE=<%= env_root %>/share/gridware/1.5.3/etc/modulerc
+export MODULES_ALCES_TCL=<%= env_root %>/share/gridware/1.5.3/etc/modules-alces.tcl
+export flight_GRIDWARE_root=<%= env_root %>/share/gridware/1.5.3
 export cw_COLOUR=1
 export cw_MODULES_VERBOSE=1
 export MODULESROOT=<%= env_root %>/share/modules/3.2.10/Modules
@@ -42,8 +42,12 @@ source <%= env_root %>/gridware+<%= env_name %>/gridware.bash.rc
 gridware() {
   (
         export FLIGHT_CWD="$(pwd)"
-        cd "<%= env_root %>/share/gridware/1.5.2"
-        /opt/flight/bin/flexec ruby bin/gridware "$@"
+        cd "<%= env_root %>/share/gridware/1.5.3"
+        if [ -x /opt/flight/bin/flexec ]; then
+          /opt/flight/bin/flexec ruby bin/gridware "$@"
+        else
+          ruby bin/gridware "$@"
+        fi
   )
 }
 export -f gridware

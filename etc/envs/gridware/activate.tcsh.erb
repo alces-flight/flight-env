@@ -34,9 +34,9 @@ endif
 
 setenv LD_LIBRARY_PATH "<%= env_root %>/share/tcl/8.6.9/lib:$flight_ENV_orig_LD_LIBRARY_PATH"
 
-setenv MODULERCFILE <%= env_root %>/share/gridware/1.5.2/etc/modulerc
-setenv MODULES_ALCES_TCL <%= env_root %>/share/gridware/1.5.2/etc/modules-alces.tcl
-setenv flight_GRIDWARE_root <%= env_root %>/share/gridware/1.5.2
+setenv MODULERCFILE <%= env_root %>/share/gridware/1.5.3/etc/modulerc
+setenv MODULES_ALCES_TCL <%= env_root %>/share/gridware/1.5.3/etc/modules-alces.tcl
+setenv flight_GRIDWARE_root <%= env_root %>/share/gridware/1.5.3
 setenv cw_COLOUR 1
 setenv cw_MODULES_VERBOSE 1
 setenv MODULESROOT <%= env_root %>/share/modules/3.2.10/Modules
@@ -46,7 +46,11 @@ if ( -f <%= env_root %>/gridware+<%= env_name %>/gridware.tcsh.rc ) then
   source <%= env_root %>/gridware+<%= env_name %>/gridware.tcsh.rc
 endif
 
-alias gridware 'setenv FLIGHT_CWD `pwd`; (cd "<%= env_root %>/share/gridware/1.5.2"; /opt/flight/bin/flexec ruby bin/gridware;'"set _exit="'$status'"); unsetenv FLIGHT_CWD; test 0 = "'$_exit;'
+if ( -f /opt/flight/bin/flexec ) then
+  alias gridware 'setenv FLIGHT_CWD `pwd`; (cd "<%= env_root %>/share/gridware/1.5.3"; /opt/flight/bin/flexec ruby bin/gridware;'"set _exit="'$status'"); unsetenv FLIGHT_CWD; test 0 = "'$_exit;'
+else
+  alias gridware 'setenv FLIGHT_CWD `pwd`; (cd "<%= env_root %>/share/gridware/1.5.3"; ruby bin/gridware;'"set _exit="'$status'"); unsetenv FLIGHT_CWD; test 0 = "'$_exit;'
+endif
 alias gr gridware
 alias mod module
 

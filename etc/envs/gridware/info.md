@@ -24,7 +24,7 @@ binary repositories.
 
 ## ENVIRONMENT CREATION
 
-This environment provides Gridware v1.5.2. It is possible to create
+This environment provides Gridware v1.5.3. It is possible to create
 either user-level Gridware environments or, if you have write access
 to the global environment tree, to create system-wide Gridware
 environments.
