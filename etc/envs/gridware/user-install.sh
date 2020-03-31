@@ -78,17 +78,17 @@ if [ ! -d "${flight_ENV_ROOT}"/share/modules/3.2.10 ]; then
   touch ${flight_ENV_ROOT}/share/modules/3.2.10/Modules/init/.modulespath
 fi
 
-if [ ! -d "${flight_ENV_ROOT}/share/gridware/1.5.3" ]; then
-  if [ ! -f gridware-legacy-1.5.3.tar.gz ]; then
+if [ ! -d "${flight_ENV_ROOT}/share/gridware/1.5.4" ]; then
+  if [ ! -f gridware-legacy-1.5.4.tar.gz ]; then
     env_stage "Fetching prerequisite (gridware)"
-    wget https://github.com/alces-flight/gridware-legacy/archive/master.tar.gz -O gridware-legacy-1.5.3.tar.gz
+    wget https://github.com/alces-flight/gridware-legacy/archive/master.tar.gz -O gridware-legacy-1.5.4.tar.gz
   fi
   env_stage "Extracting prerequisite (gridware)"
-  tar xvf gridware-legacy-1.5.3.tar.gz
+  tar xvf gridware-legacy-1.5.4.tar.gz
   env_stage "Installing prerequisite (gridware)"
-  mkdir -p "${flight_ENV_ROOT}/share/gridware/1.5.3"
-  cp -R gridware-legacy-master/* "${flight_ENV_ROOT}/share/gridware/1.5.3"
-  cd ${flight_ENV_ROOT}/share/gridware/1.5.3
+  mkdir -p "${flight_ENV_ROOT}/share/gridware/1.5.4"
+  cp -R gridware-legacy-master/* "${flight_ENV_ROOT}/share/gridware/1.5.4"
+  cd ${flight_ENV_ROOT}/share/gridware/1.5.4
   export PKG_CONFIG_PATH=/usr/lib64/pkgconfig
   if [ -x /opt/flight/bin/flexec ]; then
     /opt/flight/bin/flexec bundle install --path=vendor --without=development --without=test --local
@@ -185,7 +185,7 @@ dname="local"
 cd ${flight_ENV_ROOT}/gridware+${name}
 ln -snf "${depot}" "${dname}"
 mkdir -p "${depot}/el7/pkg" "${depot}/el7/etc"
-cp -R ${flight_ENV_ROOT}/share/gridware/1.5.3/etc/depotskel/* "${depot}/el7/etc"
+cp -R ${flight_ENV_ROOT}/share/gridware/1.5.4/etc/depotskel/* "${depot}/el7/etc"
 
 if [ "${binary_enabled}" == "true" ]; then
    udepot="$(echo ${binary_placeholder}/$(uuid -v4 | cut -c1-6))"
@@ -202,8 +202,8 @@ else
   RUBY="$(which ruby &>/dev/null)"
 fi
 cat <<RUBY | "${RUBY}"
-ENV['BUNDLE_GEMFILE'] ||= "${flight_ENV_ROOT}/share/gridware/1.5.3/Gemfile"
-\$: << "${flight_ENV_ROOT}/share/gridware/1.5.3/lib"
+ENV['BUNDLE_GEMFILE'] ||= "${flight_ENV_ROOT}/share/gridware/1.5.4/Gemfile"
+\$: << "${flight_ENV_ROOT}/share/gridware/1.5.4/lib"
 
 require 'rubygems'
 require 'bundler'
