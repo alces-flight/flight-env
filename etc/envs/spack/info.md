@@ -25,7 +25,7 @@ to build combinatorial versions of software for testing.
 
 ## ENVIRONMENT CREATION
 
-This environment provides Spack v0.12.1. It is possible to create
+This environment provides Spack v0.14.1. It is possible to create
 either user-level Spack environments or, if you have write access to
 the global environment tree, to create system-wide Spack environments.
 
