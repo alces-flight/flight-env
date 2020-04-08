@@ -25,11 +25,11 @@ GEM
       hpricot (>= 0.8.2)
       mustache (>= 0.7.0)
       rdiscount (>= 1.5.8)
-    strings (0.1.5)
+    strings (0.1.8)
       strings-ansi (~> 0.1)
       unicode-display_width (~> 1.5)
       unicode_utils (~> 1.4)
-    strings-ansi (0.1.0)
+    strings-ansi (0.2.0)
     sys-proctable (1.2.1)
       ffi
     timers (4.3.0)
