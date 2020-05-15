@@ -81,13 +81,13 @@ fi
 if [ ! -d "${flight_ENV_ROOT}/share/gridware/1.5.4" ]; then
   if [ ! -f gridware-legacy-1.5.4.tar.gz ]; then
     env_stage "Fetching prerequisite (gridware)"
-    wget https://github.com/alces-flight/gridware-legacy/archive/master.tar.gz -O gridware-legacy-1.5.4.tar.gz
+    wget https://github.com/alces-flight/gridware-legacy/archive/stable.tar.gz -O gridware-legacy-1.5.4.tar.gz
   fi
   env_stage "Extracting prerequisite (gridware)"
   tar xvf gridware-legacy-1.5.4.tar.gz
   env_stage "Installing prerequisite (gridware)"
   mkdir -p "${flight_ENV_ROOT}/share/gridware/1.5.4"
-  cp -R gridware-legacy-master/* "${flight_ENV_ROOT}/share/gridware/1.5.4"
+  cp -R gridware-legacy-stable/* "${flight_ENV_ROOT}/share/gridware/1.5.4"
   cd ${flight_ENV_ROOT}/share/gridware/1.5.4
   export PKG_CONFIG_PATH=/usr/lib64/pkgconfig
   if [ -x /opt/flight/bin/flexec ]; then
