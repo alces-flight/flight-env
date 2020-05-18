@@ -151,6 +151,7 @@ module Env
     def render_binding(name, global = false)
       render_ctx = Module.new.class.tap do |eigen|
         eigen.define_method(:env_root) { global ? Config.global_depot_path : Config.user_depot_path }
+        eigen.define_method(:env_cache) { global ? Config.global_cache_path : Config.user_cache_path }
         eigen.define_method(:env_name) { name }
         eigen.define_method(:env_global) { global }
       end
@@ -181,6 +182,10 @@ module Env
 
     def build_cache_path(global)
       global ? Config.global_build_cache_path : Config.user_build_cache_path
+    end
+
+    def cache_path(global)
+      global ? Config.global_cache_path : Config.user_cache_path
     end
 
     def run_fork(&block)
@@ -269,7 +274,8 @@ EOF
               exec(
                 {
                   'flight_ENV_ROOT' => depot_path(global),
-                  'flight_ENV_CACHE' => build_cache_path(global),
+                  'flight_ENV_CACHE' => cache_path(global),
+                  'flight_ENV_BUILD_CACHE' => build_cache_path(global),
                 },
                 '/bin/bash',
                 '-x',

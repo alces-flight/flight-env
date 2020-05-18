@@ -72,7 +72,11 @@ module Env
       end
 
       def user_build_cache_path
-        @user_build_cache_path ||= File.join(xdg_cache.home, ENV_DIR_SUFFIX, 'build')
+        @user_build_cache_path ||= File.join(user_cache_path, 'build')
+      end
+
+      def user_cache_path
+        @user_cache_path ||= File.join(xdg_cache.home, ENV_DIR_SUFFIX)
       end
 
       def global_depot_path
@@ -86,6 +90,13 @@ module Env
         @global_build_cache_path ||= data.fetch(
           :global_build_cache_path,
           default: '/opt/flight/var/cache/env/build'
+        )
+      end
+
+      def global_cache_path
+        @global_cache_path ||= data.fetch(
+          :global_cache_path,
+          default: '/opt/flight/var/cache/env'
         )
       end
 

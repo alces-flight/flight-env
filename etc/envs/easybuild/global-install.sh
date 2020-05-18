@@ -28,7 +28,8 @@
 set -e
 
 flight_ENV_ROOT=${flight_ENV_ROOT:-/opt/flight/var/lib/env}
-flight_ENV_CACHE=${flight_ENV_CACHE:-/opt/flight/var/cache/env/build}
+flight_ENV_CACHE=${flight_ENV_CACHE:-/opt/flight/var/cache/env}
+flight_ENV_BUILD_CACHE=${flight_ENV_BUILD_CACHE:-/opt/flight/var/cache/env/build}
 name=$1
 
 if [ -z "$name" ]; then
@@ -36,11 +37,9 @@ if [ -z "$name" ]; then
   exit 1
 fi
 
-# create build area
-mkdir -p ${flight_ENV_CACHE}/build
-cd ${flight_ENV_CACHE}/build
-
-mkdir -p ${flight_ENV_ROOT}
+# create directory structure
+mkdir -p ${flight_ENV_CACHE} ${flight_ENV_BUILD_CACHE} ${flight_ENV_ROOT}
+cd ${flight_ENV_BUILD_CACHE}
 
 # Stop any existing activatged EasyBuild environment from getting in
 # the way.

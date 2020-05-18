@@ -29,6 +29,7 @@ set -e
 
 flight_ENV_ROOT=${flight_ENV_ROOT:-$HOME/.local/share/flight/env}
 flight_ENV_CACHE=${flight_ENV_CACHE:-$HOME/.cache/flight/env}
+flight_ENV_BUILD_CACHE=${flight_ENV_BUILD_CACHE:-$HOME/.cache/flight/env/build}
 name=$1
 
 if [ -z "$name" ]; then
@@ -36,9 +37,9 @@ if [ -z "$name" ]; then
   exit 1
 fi
 
-# create build area
-mkdir -p ${flight_ENV_CACHE}/build
-cd ${flight_ENV_CACHE}/build
+# create directory structure
+mkdir -p ${flight_ENV_CACHE} ${flight_ENV_BUILD_CACHE} ${flight_ENV_ROOT}
+cd ${flight_ENV_BUILD_CACHE}
 
 env_stage "Verifying prerequisites"
 if [ ! -f spack-v0.14.1.tar.gz ]; then
