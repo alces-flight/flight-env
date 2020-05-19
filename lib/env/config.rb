@@ -80,23 +80,32 @@ module Env
       end
 
       def global_depot_path
-        @global_depot_path ||= data.fetch(
-          :global_depot_path,
-          default: '/opt/flight/var/lib/env'
+        @global_depot_path ||= File.expand_path(
+          data.fetch(
+            :global_depot_path,
+            default: 'var/lib/env'
+          ),
+          Config.root
         )
       end
 
       def global_build_cache_path
-        @global_build_cache_path ||= data.fetch(
-          :global_build_cache_path,
-          default: '/opt/flight/var/cache/env/build'
+        @global_build_cache_path ||= File.expand_path(
+          data.fetch(
+            :global_build_cache_path,
+            default: 'var/cache/env/build'
+          ),
+          Config.root
         )
       end
 
       def global_cache_path
-        @global_cache_path ||= data.fetch(
-          :global_cache_path,
-          default: '/opt/flight/var/cache/env'
+        @global_cache_path ||= File.expand_path(
+          data.fetch(
+            :global_cache_path,
+            default: 'var/cache/env'
+          ),
+          Config.root
         )
       end
 
