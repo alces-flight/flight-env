@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Copyright (C) 2019-present Alces Flight Ltd.
+# Copyright (C) 2020-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -28,7 +28,8 @@
 set -e
 
 flight_ENV_ROOT=${flight_ENV_ROOT:-/opt/flight/var/lib/env}
-flight_ENV_CACHE=${flight_ENV_CACHE:-/opt/flight/var/cache/env/build}
+flight_ENV_CACHE=${flight_ENV_CACHE:-/opt/flight/var/cache/env}
+flight_ENV_BUILD_CACHE=${flight_ENV_BUILD_CACHE:-/opt/flight/var/cache/env/build}
 name=$1
 
 if [ -z "$name" ]; then
@@ -36,5 +37,5 @@ if [ -z "$name" ]; then
   exit 1
 fi
 
-env_stage "Deleting environment tree (modules@${name})"
-rm -rf ${flight_ENV_ROOT}/modules+${name}
+env_stage "Deleting environment tree (example@${name})"
+rm -rf ${flight_ENV_ROOT}/example+${name}

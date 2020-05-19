@@ -63,20 +63,23 @@ module Env
       end
 
       def all
-        @types ||=
-          begin
-            {}.tap do |h|
-              Dir[File.join(Config.types_path,'*')].sort.each do |d|
+        @types ||= {}.tap do |h|
+          {}.tap do |a|
+            Config.type_paths.each do |p|
+              Dir[File.join(p,'*')].each do |d|
                 begin
                   md = YAML.load_file(File.join(d,'metadata.yml'))
                   t = Type.new(md, d)
-                  h[md[:name].to_sym] = t if t.supports_host_arch?
+                  a[t.name.to_sym] = t if t.supports_host_arch?
                 rescue
                   nil
                 end
               end
             end
           end
+            .values.sort {|a,b| a.name <=> b.name}
+            .each {|t| h[t.name.to_sym] = t}
+        end
       end
     end
 

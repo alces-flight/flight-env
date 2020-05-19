@@ -1,4 +1,7 @@
 ---
+# Directories containing env type definitions
+#type_paths:
+#  - etc/types
 # Path to global/system-wide depots
 #global_depot_path: /opt/flight/var/lib/env
 # Path to global/system-wide build cache

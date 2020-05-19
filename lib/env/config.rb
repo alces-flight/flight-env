@@ -109,8 +109,14 @@ module Env
         @root ||= File.expand_path(File.join(__dir__, '..', '..'))
       end
 
-      def types_path
-        @types_path ||= File.join(root, 'etc', 'envs')
+      def type_paths
+        @type_paths ||=
+          data.fetch(
+            :type_paths,
+            default: [
+              'etc/types'
+            ]
+          ).map {|p| File.expand_path(p, Config.root)}
       end
 
       private

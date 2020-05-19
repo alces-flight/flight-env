@@ -33,11 +33,15 @@ module Env
   module Commands
     class ListTypes < Command
       def run
-        cmd = self
-        Table.emit do |t|
-          headers 'Name', 'Summary'
-          Env::Type.each do |t|
-            row Paint[t.name, :cyan], cmd.word_wrap("#{Paint[t.summary, :green]}\n > #{Paint[t.url, :blue, :bright, :underline]}\n ", line_width: TTY::Screen.width - 30)
+        if Type.all.empty?
+          puts "No environment types found."
+        else
+          cmd = self
+          Table.emit do |t|
+            headers 'Name', 'Summary'
+            Env::Type.each do |t|
+              row Paint[t.name, :cyan], cmd.word_wrap("#{Paint[t.summary, :green]}\n > #{Paint[t.url, :blue, :bright, :underline]}\n ", line_width: TTY::Screen.width - 30)
+            end
           end
         end
       end

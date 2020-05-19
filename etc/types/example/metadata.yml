@@ -1,0 +1,7 @@
+:name: example
+:summary: |
+  An example environment.
+:url: https://openflighthpc.org/
+:arch:
+  - x86_64
+  - aarch64
