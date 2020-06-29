@@ -1,6 +1,5 @@
-# coding: utf-8
 # =============================================================================
-# Copyright (C) 2019-present Alces Flight Ltd.
+# Copyright (C) 2020-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -25,32 +24,18 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-require 'env/command'
-require 'env/table'
-require 'env/type'
+set flight_ENV_orig_PATH = "$PATH"
+set flight_ENV_orig_prompt = "$prompt"
 
-module Env
-  module Commands
-    class ListTypes < Command
-      def run
-        if Type.all.empty?
-          puts "No environment types found."
-        else
-          cmd = self
-          Table.emit do |t|
-            headers 'Name', 'Summary'
-            Env::Type.each do |t|
-              row Paint[t.name, :cyan], cmd.word_wrap("#{Paint[t.summary, :green]}\n > #{Paint[t.url, :blue, :bright, :underline]}\n ", line_width: TTY::Screen.width - 30)
-            end
-          end
-        end
-      end
+setenv flight_ENV_active "example@<%= env_name %>"
+setenv flight_ENV_scope "<%= env_global ? 'global' : 'user' %>"
+setenv flight_ENV_dir "<%= env_root %>/example+<%= env_name %>"
 
-      def word_wrap(text, line_width: 80, break_sequence: "\n")
-        text.split("\n").collect! do |line|
-          line.length > line_width ? line.gsub(/(.{1,#{line_width}})(\s+|$)/, "\\1#{break_sequence}").strip : line
-        end * break_sequence
-      end
-    end
-  end
-end
+set bold='%{\033[1m%}'
+set reverse='%{\033[7m%}'
+set reset='%{\033[0;1m%}'
+set clr='%{\033[0m%}'
+set prompt="$bold<example<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '$reverse{+}$reset' : '' %>>$clr $prompt"
+unset bold reverse reset clr
+
+setenv EXAMPLE_SETTING "example"

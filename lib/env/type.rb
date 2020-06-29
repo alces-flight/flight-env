@@ -37,6 +37,17 @@ require_relative 'patches/unicode-display_width'
 module Env
   class Type
     DEFAULT = 'default'
+    FUNC_DELIMITER = begin
+                       major, minor, patch =
+                                     IO.popen("/bin/bash -c 'echo $BASH_VERSION'")
+                                       .read.split('.')[0..2]
+                                       .map(&:to_i)
+                       (
+                         major > 4 ||
+                         major == 4 && minor > 3 ||
+                         major == 4 && minor == 3 && patch >= 27
+                       ) ? '%%' : '()'
+                     end
 
     class << self
       def each(&block)
@@ -52,20 +63,23 @@ module Env
       end
 
       def all
-        @types ||=
-          begin
-            {}.tap do |h|
-              Dir[File.join(Config.types_path,'*')].sort.each do |d|
+        @types ||= {}.tap do |h|
+          {}.tap do |a|
+            Config.type_paths.each do |p|
+              Dir[File.join(p,'*')].each do |d|
                 begin
                   md = YAML.load_file(File.join(d,'metadata.yml'))
                   t = Type.new(md, d)
-                  h[md[:name].to_sym] = t if t.supports_host_arch?
+                  a[t.name.to_sym] = t if t.supports_host_arch?
                 rescue
                   nil
                 end
               end
             end
           end
+            .values.sort {|a,b| a.name <=> b.name}
+            .each {|t| h[t.name.to_sym] = t}
+        end
       end
     end
 
@@ -140,6 +154,7 @@ module Env
     def render_binding(name, global = false)
       render_ctx = Module.new.class.tap do |eigen|
         eigen.define_method(:env_root) { global ? Config.global_depot_path : Config.user_depot_path }
+        eigen.define_method(:env_cache) { global ? Config.global_cache_path : Config.user_cache_path }
         eigen.define_method(:env_name) { name }
         eigen.define_method(:env_global) { global }
       end
@@ -170,6 +185,10 @@ module Env
 
     def build_cache_path(global)
       global ? Config.global_build_cache_path : Config.user_build_cache_path
+    end
+
+    def cache_path(global)
+      global ? Config.global_cache_path : Config.user_cache_path
     end
 
     def run_fork(&block)
@@ -225,7 +244,7 @@ module Env
     end
 
     def setup_bash_funcs(h, fileno)
-      h['BASH_FUNC_flight_env_comms()'] = <<EOF
+      h["BASH_FUNC_flight_env_comms#{FUNC_DELIMITER}"] = <<EOF
 () { local msg=$1
  shift
  if [ "$1" ]; then
@@ -235,8 +254,8 @@ module Env
  fi
 }
 EOF
-      h['BASH_FUNC_env_err()'] = "() { flight_env_comms ERR \"$@\"\n}"
-      h['BASH_FUNC_env_stage()'] = "() { flight_env_comms STAGE \"$@\"\n}"
+      h["BASH_FUNC_env_err#{FUNC_DELIMITER}"] = "() { flight_env_comms ERR \"$@\"\n}"
+      h["BASH_FUNC_env_stage#{FUNC_DELIMITER}"] = "() { flight_env_comms STAGE \"$@\"\n}"
 #      h['BASH_FUNC_env_cat()'] = "() { flight_env_comms\n}"
 #      h['BASH_FUNC_env_echo()'] = "() { flight_env_comms DATA \"$@\"\necho \"$@\"\n}"
     end
@@ -258,7 +277,8 @@ EOF
               exec(
                 {
                   'flight_ENV_ROOT' => depot_path(global),
-                  'flight_ENV_CACHE' => build_cache_path(global),
+                  'flight_ENV_CACHE' => cache_path(global),
+                  'flight_ENV_BUILD_CACHE' => build_cache_path(global),
                 },
                 '/bin/bash',
                 '-x',

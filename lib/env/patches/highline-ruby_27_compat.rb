@@ -1,8 +1,7 @@
-#!/usr/bin/env ruby
 # =============================================================================
 # Copyright (C) 2019-present Alces Flight Ltd.
 #
-# This file is part of Flight Environment.
+# This file is part of Flight Desktop.
 #
 # This program and the accompanying materials are made available under
 # the terms of the Eclipse Public License 2.0 which is available at
@@ -10,7 +9,7 @@
 # terms made available by Alces Flight Ltd - please direct inquiries
 # about licensing to licensing@alces-flight.com.
 #
-# Flight Environment is distributed in the hope that it will be useful, but
+# Flight Desktop is distributed in the hope that it will be useful, but
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR
 # IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS
 # OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A
@@ -18,32 +17,28 @@
 # details.
 #
 # You should have received a copy of the Eclipse Public License 2.0
-# along with Flight Environment. If not, see:
+# along with Flight Desktop. If not, see:
 #
 #  https://opensource.org/licenses/EPL-2.0
 #
-# For more information on Flight Environment, please visit:
-# https://github.com/openflightpc/flight-env
+# For more information on Flight Desktop, please visit:
+# https://github.com/alces-flight/flight-desktop
 # ==============================================================================
-begin
-  lib_dir = File.expand_path(File.join(__FILE__, '../../lib'))
-  $LOAD_PATH.unshift(lib_dir)
-  ENV['BUNDLE_GEMFILE'] ||= File.join(__FILE__, '../../Gemfile')
+# Ensure HighLine doesn't output deprecation warnings for Ruby 2.7
+class HighLine
+  def say(statement)
+    statement = format_statement(statement)
+    return unless statement.length > 0
 
-  require 'rubygems'
-  gem 'bundler', '2.1.4'
-  require 'bundler'
+    out = (indentation+statement).encode(Encoding.default_external, :undef => :replace)
 
-  Bundler.setup(:default)
-
-  require 'env/cli'
-  Dir.chdir(ENV.fetch('FLIGHT_CWD','.'))
-  Env::CLI.run!
-rescue Interrupt
-  if Kernel.const_defined?(:Paint)
-    $stderr.puts "\n#{Paint['WARNING', :underline, :yellow]}: Cancelled by user"
-  else
-    $stderr.puts "\nWARNING: Cancelled by user"
+    # Don't add a newline if statement ends with whitespace, OR
+    # if statement ends with whitespace before a color escape code.
+    if /[ \t](\e\[\d+(;\d+)*m)?\Z/ =~ statement
+      @output.print(out)
+      @output.flush
+    else
+      @output.puts(out)
+    end
   end
-  exit(130)
 end

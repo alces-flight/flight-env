@@ -1,6 +1,5 @@
-# coding: utf-8
 # =============================================================================
-# Copyright (C) 2019-present Alces Flight Ltd.
+# Copyright (C) 2020-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -25,32 +24,17 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-require 'env/command'
-require 'env/table'
-require 'env/type'
+export flight_ENV_orig_PATH="$PATH"
+export flight_ENV_orig_PS1="$PS1"
 
-module Env
-  module Commands
-    class ListTypes < Command
-      def run
-        if Type.all.empty?
-          puts "No environment types found."
-        else
-          cmd = self
-          Table.emit do |t|
-            headers 'Name', 'Summary'
-            Env::Type.each do |t|
-              row Paint[t.name, :cyan], cmd.word_wrap("#{Paint[t.summary, :green]}\n > #{Paint[t.url, :blue, :bright, :underline]}\n ", line_width: TTY::Screen.width - 30)
-            end
-          end
-        end
-      end
+export flight_ENV_active=example@<%= env_name %>
+export flight_ENV_scope=<%= env_global ? 'global' : 'user' %>
+export flight_ENV_dir=<%= env_root %>/example+<%= env_name %>
 
-      def word_wrap(text, line_width: 80, break_sequence: "\n")
-        text.split("\n").collect! do |line|
-          line.length > line_width ? line.gsub(/(.{1,#{line_width}})(\s+|$)/, "\\1#{break_sequence}").strip : line
-        end * break_sequence
-      end
-    end
-  end
-end
+if [[ $TERM == "xterm-256color" ]]; then
+  PS1="\[\033[48;5;25;1;38;5;189m\]<example<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '\[\033[1;38;5;219m\]{+}\[\033[1;38;5;189m\]' : '' %>>\[\033[0m\] $PS1"
+else
+  PS1="\[\033[1m\]<example<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '\[\033[7m\]{+}\[\033[0;1m\]' : '' %>>\[\033[0m\] $PS1"
+fi
+
+export EXAMPLE_SETTING=example
