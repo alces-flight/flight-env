@@ -1,5 +1,6 @@
+#!/bin/bash
 # =============================================================================
-# Copyright (C) 2019-present Alces Flight Ltd.
+# Copyright (C) 2020-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -24,24 +25,17 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-module purge
+set -e
 
-foreach var (_sp_dotkit_root _sp_lmod_root _sp_module_prefix _sp_sys_type _sp_tcl_root _spack_share_dir _spack_source_file modules_shell)
-  unset $var
-end
+flight_ENV_ROOT=${flight_ENV_ROOT:-${flight_ROOT}/var/lib/env}
+flight_ENV_CACHE=${flight_ENV_CACHE:-${flight_ROOT}/var/cache/env}
+flight_ENV_BUILD_CACHE=${flight_ENV_BUILD_CACHE:-${flight_ROOT}/var/cache/env/build}
+name=$1
 
-foreach evar (SPACK_ROOT DK_NODE MODULEPATH MODULESHOME LOADEDMODULES)
-  unsetenv $evar
-end
-unset evar
+if [ -z "$name" ]; then
+  echo "error: environment name not supplied"
+  exit 1
+fi
 
-foreach avar (_spack_pathadd spack module)
-  unalias $avar
-end
-unset avar
-
-unsetenv flight_ENV_active flight_ENV_scope flight_ENV_dir
-set prompt="${flight_ENV_orig_prompt}"
-unset flight_ENV_orig_prompt
-setenv PATH "${flight_ENV_orig_PATH}"
-unset flight_ENV_orig_PATH
+env_stage "Deleting environment tree (example@${name})"
+rm -rf ${flight_ENV_ROOT}/example+${name}

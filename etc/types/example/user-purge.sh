@@ -1,5 +1,6 @@
+#!/bin/bash
 # =============================================================================
-# Copyright (C) 2019-present Alces Flight Ltd.
+# Copyright (C) 2020-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -24,20 +25,17 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-set flight_ENV_orig_prompt = "$prompt"
+set -e
 
-setenv EASYBUILD_MODULES_TOOL Lmod
-setenv EASYBUILD_INSTALLPATH <%= env_root %>/easybuild+<%= env_name %>
-source <%= env_root %>/share/lmod/8.1/lmod/8.1/init/tcsh
-module use <%= env_root %>/easybuild+<%= env_name %>/modules/all
+flight_ENV_ROOT=${flight_ENV_ROOT:-$HOME/.local/share/flight/env}
+flight_ENV_CACHE=${flight_ENV_CACHE:-$HOME/.cache/flight/env}
+flight_ENV_BUILD_CACHE=${flight_ENV_BUILD_CACHE:-$HOME/.cache/flight/env/build}
+name=$1
 
-setenv flight_ENV_active easybuild@<%= env_name %>
-setenv flight_ENV_scope <%= env_global ? 'global' : 'user' %>
-setenv flight_ENV_dir <%= env_root %>/easybuild+<%= env_name %>
+if [ -z "$name" ]; then
+  echo "error: environment name not supplied"
+  exit 1
+fi
 
-set bold='%{\033[1m%}'
-set reverse='%{\033[7m%}'
-set reset='%{\033[0;1m%}'
-set clr='%{\033[0m%}'
-set prompt="$bold<easybuild<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '$reverse{+}$reset' : '' %>>$clr $prompt"
-unset bold reverse reset clr
+env_stage "Deleting environment tree (example@${name})"
+rm -rf ${flight_ENV_ROOT}/example+${name}

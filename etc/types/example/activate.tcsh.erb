@@ -1,6 +1,5 @@
-#!/bin/bash
 # =============================================================================
-# Copyright (C) 2019-present Alces Flight Ltd.
+# Copyright (C) 2020-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -25,16 +24,18 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-set -e
+set flight_ENV_orig_PATH = "$PATH"
+set flight_ENV_orig_prompt = "$prompt"
 
-flight_ENV_ROOT=${flight_ENV_ROOT:-/opt/flight/var/lib/env}
-flight_ENV_CACHE=${flight_ENV_CACHE:-/opt/flight/var/cache/env/build}
-name=$1
+setenv flight_ENV_active "example@<%= env_name %>"
+setenv flight_ENV_scope "<%= env_global ? 'global' : 'user' %>"
+setenv flight_ENV_dir "<%= env_root %>/example+<%= env_name %>"
 
-if [ -z "$name" ]; then
-  echo "error: environment name not supplied"
-  exit 1
-fi
+set bold='%{\033[1m%}'
+set reverse='%{\033[7m%}'
+set reset='%{\033[0;1m%}'
+set clr='%{\033[0m%}'
+set prompt="$bold<example<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '$reverse{+}$reset' : '' %>>$clr $prompt"
+unset bold reverse reset clr
 
-env_stage "Deleting environment tree (modules@${name})"
-rm -rf ${flight_ENV_ROOT}/modules+${name}
+setenv EXAMPLE_SETTING "example"

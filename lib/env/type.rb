@@ -63,20 +63,23 @@ module Env
       end
 
       def all
-        @types ||=
-          begin
-            {}.tap do |h|
-              Dir[File.join(Config.types_path,'*')].sort.each do |d|
+        @types ||= {}.tap do |h|
+          {}.tap do |a|
+            Config.type_paths.each do |p|
+              Dir[File.join(p,'*')].each do |d|
                 begin
                   md = YAML.load_file(File.join(d,'metadata.yml'))
                   t = Type.new(md, d)
-                  h[md[:name].to_sym] = t if t.supports_host_arch?
+                  a[t.name.to_sym] = t if t.supports_host_arch?
                 rescue
                   nil
                 end
               end
             end
           end
+            .values.sort {|a,b| a.name <=> b.name}
+            .each {|t| h[t.name.to_sym] = t}
+        end
       end
     end
 
@@ -151,6 +154,7 @@ module Env
     def render_binding(name, global = false)
       render_ctx = Module.new.class.tap do |eigen|
         eigen.define_method(:env_root) { global ? Config.global_depot_path : Config.user_depot_path }
+        eigen.define_method(:env_cache) { global ? Config.global_cache_path : Config.user_cache_path }
         eigen.define_method(:env_name) { name }
         eigen.define_method(:env_global) { global }
       end
@@ -181,6 +185,10 @@ module Env
 
     def build_cache_path(global)
       global ? Config.global_build_cache_path : Config.user_build_cache_path
+    end
+
+    def cache_path(global)
+      global ? Config.global_cache_path : Config.user_cache_path
     end
 
     def run_fork(&block)
@@ -269,7 +277,8 @@ EOF
               exec(
                 {
                   'flight_ENV_ROOT' => depot_path(global),
-                  'flight_ENV_CACHE' => build_cache_path(global),
+                  'flight_ENV_CACHE' => cache_path(global),
+                  'flight_ENV_BUILD_CACHE' => build_cache_path(global),
                 },
                 '/bin/bash',
                 '-x',

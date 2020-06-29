@@ -72,20 +72,40 @@ module Env
       end
 
       def user_build_cache_path
-        @user_build_cache_path ||= File.join(xdg_cache.home, ENV_DIR_SUFFIX, 'build')
+        @user_build_cache_path ||= File.join(user_cache_path, 'build')
+      end
+
+      def user_cache_path
+        @user_cache_path ||= File.join(xdg_cache.home, ENV_DIR_SUFFIX)
       end
 
       def global_depot_path
-        @global_depot_path ||= data.fetch(
-          :global_depot_path,
-          default: '/opt/flight/var/lib/env'
+        @global_depot_path ||= File.expand_path(
+          data.fetch(
+            :global_depot_path,
+            default: 'var/lib/env'
+          ),
+          Config.root
         )
       end
 
       def global_build_cache_path
-        @global_build_cache_path ||= data.fetch(
-          :global_build_cache_path,
-          default: '/opt/flight/var/cache/env/build'
+        @global_build_cache_path ||= File.expand_path(
+          data.fetch(
+            :global_build_cache_path,
+            default: 'var/cache/env/build'
+          ),
+          Config.root
+        )
+      end
+
+      def global_cache_path
+        @global_cache_path ||= File.expand_path(
+          data.fetch(
+            :global_cache_path,
+            default: 'var/cache/env'
+          ),
+          Config.root
         )
       end
 
@@ -98,8 +118,14 @@ module Env
         @root ||= File.expand_path(File.join(__dir__, '..', '..'))
       end
 
-      def types_path
-        @types_path ||= File.join(root, 'etc', 'envs')
+      def type_paths
+        @type_paths ||=
+          data.fetch(
+            :type_paths,
+            default: [
+              'etc/types'
+            ]
+          ).map {|p| File.expand_path(p, Config.root)}
       end
 
       private

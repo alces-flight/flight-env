@@ -28,6 +28,7 @@ require_relative 'commands'
 require_relative 'version'
 
 require 'commander'
+require_relative 'patches/highline-ruby_27_compat'
 
 module Env
   module CLI

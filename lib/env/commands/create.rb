@@ -32,13 +32,18 @@ module Env
   module Commands
     class Create < Command
       def run
-        Environment.global_only = true if @options.global
-        type, name = args[0].split('@')
-        opts = {}.tap do |h|
-          h[:name] = name unless name.nil?
-          h[:global] = true if @options.global
+        active_env = Environment.active
+        if active_env.nil?
+          Environment.global_only = true if @options.global
+          type, name = args[0].split('@')
+          opts = {}.tap do |h|
+            h[:name] = name unless name.nil?
+            h[:global] = true if @options.global
+          end
+          Environment.create(Type[type], **opts)
+        else
+          raise ActiveEnvironmentError, "unable to create with active environment: #{active_env}"
         end
-        Environment.create(Type[type], **opts)
       end
     end
   end

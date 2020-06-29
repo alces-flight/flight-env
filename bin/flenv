@@ -31,6 +31,7 @@ begin
   ENV['BUNDLE_GEMFILE'] ||= File.join(__FILE__, '../../Gemfile')
 
   require 'rubygems'
+  gem 'bundler', '2.1.4'
   require 'bundler'
 
   Bundler.setup(:default)

@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Copyright (C) 2019-present Alces Flight Ltd.
+# Copyright (C) 2020-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -27,8 +27,9 @@
 # ==============================================================================
 set -e
 
-flight_ENV_ROOT=${flight_ENV_ROOT:-$HOME/.local/share/flight/env}
-flight_ENV_CACHE=${flight_ENV_CACHE:-$HOME/.cache/flight/env}
+flight_ENV_ROOT=${flight_ENV_ROOT:-${flight_ROOT}/var/lib/env}
+flight_ENV_CACHE=${flight_ENV_CACHE:-${flight_ROOT}/var/cache/env}
+flight_ENV_BUILD_CACHE=${flight_ENV_BUILD_CACHE:-${flight_ROOT}/var/cache/env/build}
 name=$1
 
 if [ -z "$name" ]; then
@@ -36,22 +37,14 @@ if [ -z "$name" ]; then
   exit 1
 fi
 
-# create build area
-mkdir -p ${flight_ENV_CACHE}/build
-cd ${flight_ENV_CACHE}/build
+# create directory structure
+mkdir -p ${flight_ENV_CACHE} ${flight_ENV_BUILD_CACHE} ${flight_ENV_ROOT}
+cd ${flight_ENV_BUILD_CACHE}
 
 env_stage "Verifying prerequisites"
-if [ ! -f spack-v0.12.1.tar.gz ]; then
-  env_stage "Fetching prerequisite (spack)"
-  wget https://github.com/spack/spack/archive/v0.12.1.tar.gz -O spack-v0.12.1.tar.gz
-fi
 
-mkdir -p ${flight_ENV_ROOT}/spack+${name}
-env_stage "Extracting Spack hierarchy (spack@${name})"
-tar -C ${flight_ENV_ROOT}/spack+${name} -xzf spack-v0.12.1.tar.gz --strip-components=1
-cd ${flight_ENV_ROOT}/spack+${name}
-env_stage "Bootstrapping Spack environment (spack@${name})"
-if ! which python &>/dev/null; then
-  sed -i -e 's,#!/usr/bin/env python$,#!/usr/bin/env python3,g' bin/spack
-fi
-bin/spack bootstrap
+env_stage "Creating environment (example@${name})"
+mkdir -p ${flight_ENV_ROOT}/example+${name}
+cat <<EOF > ${flight_ENV_ROOT}/example+${name}/example.txt
+This is an example ecosystem definition for Flight Environment.
+EOF

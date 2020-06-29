@@ -1,6 +1,0 @@
-:name: singularity
-:summary: |
-  Container solution for scientific and application driven workloads.
-:url: https://www.sylabs.io/
-:arch:
-  - x86_64

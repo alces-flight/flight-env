@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Copyright (C) 2019-present Alces Flight Ltd.
+# Copyright (C) 2020-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -27,8 +27,9 @@
 # ==============================================================================
 set -e
 
-flight_ENV_ROOT=${flight_ENV_ROOT:-/opt/flight/var/lib/env}
-flight_ENV_CACHE=${flight_ENV_CACHE:-/opt/flight/var/cache/env/build}
+flight_ENV_ROOT=${flight_ENV_ROOT:-$HOME/.local/share/flight/env}
+flight_ENV_CACHE=${flight_ENV_CACHE:-$HOME/.cache/flight/env}
+flight_ENV_BUILD_CACHE=${flight_ENV_BUILD_CACHE:-$HOME/.cache/flight/env/build}
 name=$1
 
 if [ -z "$name" ]; then
@@ -36,16 +37,14 @@ if [ -z "$name" ]; then
   exit 1
 fi
 
-# create build area
-mkdir -p ${flight_ENV_CACHE}/build
-cd ${flight_ENV_CACHE}/build
+# create directory structure
+mkdir -p ${flight_ENV_CACHE} ${flight_ENV_BUILD_CACHE} ${flight_ENV_ROOT}
+cd ${flight_ENV_BUILD_CACHE}
 
 env_stage "Verifying prerequisites"
-if [ ! -f Miniconda3-latest-Linux-x86_64.sh ]; then
-  env_stage "Fetching prerequisite (miniconda)"
-  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-fi
 
-env_stage "Creating environment (conda@${name})"
-mkdir -p ${flight_ENV_ROOT}
-bash Miniconda3-latest-Linux-x86_64.sh -b -p ${flight_ENV_ROOT}/conda+${name}
+env_stage "Creating environment (example@${name})"
+mkdir -p ${flight_ENV_ROOT}/example+${name}
+cat <<EOF > ${flight_ENV_ROOT}/example+${name}/example.txt
+This is an example ecosystem definition for Flight Environment.
+EOF
