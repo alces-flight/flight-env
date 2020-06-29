@@ -25,5 +25,5 @@
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
 module Env
-  VERSION = '1.4.0-rc6'
+  VERSION = '1.4.0'
 end
