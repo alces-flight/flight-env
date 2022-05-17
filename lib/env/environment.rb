@@ -76,14 +76,17 @@ module Env
           Config.user_data.delete(:default_environment)
           Config.save_user_data
         end
-
       end
 
       def set_default(env_name, global)
         self[env_name].tap do |env|
           if global
-            Config.data.set(:default_environment, value: env.to_s)
-            Config.save_data
+            if env.global?
+              Config.data.set(:default_environment, value: env.to_s)
+              Config.save_data
+            else
+              raise GlobalEnvironmentError, "user environment #{env_name} cannot be set as the global default"
+            end
           else
             Config.user_data.set(:default_environment, value: env.to_s)
             Config.save_user_data

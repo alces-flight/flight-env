@@ -30,6 +30,7 @@ module Env
   NoSuchEnvironmentError = Class.new(RuntimeError)
   EvaluatorError = Class.new(RuntimeError)
   ActiveEnvironmentError = Class.new(RuntimeError)
+  GlobalEnvironmentError = Class.new(RuntimeError)
   IncompleteTypeError = Class.new(RuntimeError)
   EnvironmentOperationError = Class.new(RuntimeError)
   InterruptedOperationError = Class.new(RuntimeError)
