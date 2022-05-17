@@ -28,18 +28,19 @@ module Env
   module Commands
     class SetDefault < Command
       def run
+        global = @options.global
         if @options.remove
           if @args.any?
             raise OptionParser::InvalidArgument, "do not specify environment when removing default"
           end
-          Environment.remove_default
-          puts "Default environment removed"
+          Environment.remove_default(global)
+          puts "Default #{ global ? "global " : "" }environment removed"
         else
           if @args.empty?
             raise OptionParser::MissingArgument, "must specify environment when setting default"
           end
-          e = Environment.set_default(args[0])
-          puts "Default environment set to: #{e}"
+          e = Environment.set_default(args[0], @options.global)
+          puts "Default #{ global ? "global " : "" }environment set to: #{e}"
         end
       end
     end

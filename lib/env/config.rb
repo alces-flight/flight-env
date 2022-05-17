@@ -57,6 +57,16 @@ module Env
         end
       end
 
+      def save_data
+        FileUtils.mkdir_p(
+          File.join(
+            root, 'etc',
+            ENV_DIR_SUFFIX
+          )
+        )
+        data.write(force: true)
+      end
+
       def save_user_data
         FileUtils.mkdir_p(
           File.join(

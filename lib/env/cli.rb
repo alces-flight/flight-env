@@ -146,6 +146,7 @@ module Env
       cli_syntax(c, '[NAME]')
       c.description = "Set the default application environment"
       c.option '--remove', 'Remove the default application environment if it is set.'
+      c.option '-g', '--global', 'Set the global default application environment'
       c.action Commands, :set_default
     end
   end

@@ -65,18 +65,29 @@ module Env
       end
 
       def default
-        Config.user_data.fetch(:default_environment)
+        Config.user_data.fetch(:default_environment) || Config.data.fetch(:default_environment)
       end
 
-      def remove_default
-        Config.user_data.delete(:default_environment)
-        Config.save_user_data
-      end
-
-      def set_default(env_name)
-        self[env_name].tap do |env|
-          Config.user_data.set(:default_environment, value: env.to_s)
+      def remove_default(global)
+        if global
+          Config.data.delete(:default_environment)
+          Config.save_data
+        else
+          Config.user_data.delete(:default_environment)
           Config.save_user_data
+        end
+
+      end
+
+      def set_default(env_name, global)
+        self[env_name].tap do |env|
+          if global
+            Config.data.set(:default_environment, value: env.to_s)
+            Config.save_data
+          else
+            Config.user_data.set(:default_environment, value: env.to_s)
+            Config.save_user_data
+          end
         end
       end
 
