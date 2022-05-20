@@ -145,8 +145,8 @@ module Env
     command :'set-default' do |c|
       cli_syntax(c, '[NAME]')
       c.description = "Set the default application environment"
-      c.option '--remove', 'Remove the default application environment if it is set.'
-      c.option '-g', '--global', 'Set the global default application environment'
+      c.option '--system', 'Set the system default application environment.'
+      c.option '--use_system', 'Use the system default application environment'
       c.action Commands, :set_default
     end
   end
