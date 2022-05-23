@@ -33,7 +33,7 @@ module Env
         end
         Environment.remove_default(@options.system)
         Environment.system_default_opt_out(true)
-        puts "Default environment removed"
+        puts "#{ @options.system ? "System-wide d" : "D" }efault environment removed"
       end
     end
   end
