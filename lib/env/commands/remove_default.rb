@@ -28,9 +28,6 @@ module Env
   module Commands
     class RemoveDefault < Command
       def run
-        if @args.any?
-          raise OptionParser::InvalidArgument, "do not specify environment when removing default"
-        end
         Environment.remove_default(@options.system)
         Environment.system_default_opt_out(true)
         puts "#{ @options.system ? "System-wide d" : "D" }efault environment removed"

@@ -28,7 +28,14 @@ module Env
   module Commands
     class SetDefault < Command
       def run
-        if @options.use_system
+        if @options.remove
+          STDERR.puts "WARNING: The `--remove` option is now deprecated. " \
+                      "In future, please use the `remove-default` command to " \
+                      "remove the default login environment. " \
+                      "See `flight env help remove-default` for more information." \
+                      "\n\n"
+          RemoveDefault.new([],@options).run
+        elsif @options.use_system
           Environment.remove_default(false)
           Environment.system_default_opt_out(false)
           puts "Default login environment has been set to the system-wide default."

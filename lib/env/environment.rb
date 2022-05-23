@@ -72,8 +72,8 @@ module Env
         end
       end
 
-      def remove_default(global)
-        if global
+      def remove_default(system)
+        if system
           Config.data.delete(:default_environment)
           Config.save_data
         else
@@ -82,14 +82,14 @@ module Env
         end
       end
 
-      def set_default(env_name, global)
+      def set_default(env_name, system)
         self[env_name].tap do |env|
-          if global
+          if system
             if env.global?
               Config.data.set(:default_environment, value: env.to_s)
               Config.save_data
             else
-              raise GlobalEnvironmentError, "user environment #{env_name} cannot be set as the global default"
+              raise GlobalEnvironmentError, "user environment #{env_name} cannot be set as the system default"
             end
           else
             Config.user_data.set(:default_environment, value: env.to_s)
