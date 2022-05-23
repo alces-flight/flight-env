@@ -36,7 +36,7 @@ module Env
           if @args.empty?
             raise OptionParser::MissingArgument, "must specify environment when setting default"
           end
-          system = @options.global
+          system = @options.system
           e = Environment.set_default(args[0], system)
           puts "Default #{ system ? "system-wide " : "" }environment set to: #{e}"
         end

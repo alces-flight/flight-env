@@ -154,7 +154,7 @@ module Env
       cli_syntax(c)
       c.description = "Remove the default application environment"
       c.option '--system', 'Set the system default application environment.'
-      c.action Commands, :remove-default
+      c.action Commands, :remove_default
     end
   end
 end
