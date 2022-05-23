@@ -65,7 +65,11 @@ module Env
       end
 
       def default
-        Config.user_data.fetch(:default_environment) || Config.data.fetch(:default_environment)
+        Config.user_data.fetch(:default_environment) || begin
+          unless Config.user_data.fetch(:system_default_opt_out)
+            Config.data.fetch(:default_environment)
+          end
+        end
       end
 
       def remove_default(global)
@@ -92,6 +96,11 @@ module Env
             Config.save_user_data
           end
         end
+      end
+
+      def system_default_opt_out(optout)
+        Config.user_data.set(:system_default_opt_out, value: optout)
+        Config.save_user_data
       end
 
       def create(type, name: DEFAULT, global: false)

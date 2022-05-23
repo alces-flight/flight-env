@@ -149,5 +149,12 @@ module Env
       c.option '--use_system', 'Use the system default application environment'
       c.action Commands, :set_default
     end
+
+    command :'remove-default' do |c|
+      cli_syntax(c)
+      c.description = "Remove the default application environment"
+      c.option '--system', 'Set the system default application environment.'
+      c.action Commands, :remove-default
+    end
   end
 end
