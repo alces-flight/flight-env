@@ -31,7 +31,12 @@ module Env
         if @options.use_system
           Environment.remove_default(false)
           Environment.system_default_opt_out(false)
-          puts "Using system default login environment."
+          puts "Default login environment has been set to the system-wide default."
+          if d = Environment.default
+            puts "Currently set to: #{d}"
+          else
+            puts "Currently, no system default is set."
+          end
         else
           if @args.empty?
             raise OptionParser::MissingArgument, "must specify environment when setting default"
