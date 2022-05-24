@@ -29,11 +29,11 @@ module Env
     class SetDefault < Command
       def run
         if @options.remove
-          $stderr.puts "#{Paint['WARNING', :underline, :yellow]}: " \
-                      "The #{Paint['--remove', :bold]} option is deprecated. " \
-                      "The command #{Paint['remove-default', :bold]} should be used instead. " \
-                      "See #{Paint[Env::CLI::PROGRAM_NAME+' help remove-default', :bold]} for more information." \
-                      "\n\n"
+          msg = "#{Paint['WARNING', :underline, :yellow]}: " \
+            "The #{Paint['--remove', :bold]} option is deprecated. " \
+            "Use the #{Paint['remove-default', :bold]} command instead. " \
+            "See #{Paint[Env::CLI::PROGRAM_NAME+' help remove-default', :bold]} for more information."
+          $stderr.puts(word_wrap(msg, line_width: TTY::Screen.width))
           RemoveDefault.new([],@options).run
         elsif @options.use_system
           Environment.remove_default(false)
