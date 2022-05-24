@@ -89,7 +89,7 @@ module Env
               Config.data.set(:default_environment, value: env.to_s)
               Config.save_data
             else
-              raise GlobalEnvironmentError, "user environment #{env_name} cannot be set as the system default"
+              raise SystemEnvironmentError, "user environment #{env_name} cannot be set as the system default"
             end
           else
             Config.user_data.set(:default_environment, value: env.to_s)

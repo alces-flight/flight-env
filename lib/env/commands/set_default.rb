@@ -29,10 +29,10 @@ module Env
     class SetDefault < Command
       def run
         if @options.remove
-          STDERR.puts "WARNING: The `--remove` option is now deprecated. " \
-                      "In future, please use the `remove-default` command to " \
-                      "remove the default login environment. " \
-                      "See `flight env help remove-default` for more information." \
+          $stderr.puts "#{Paint['WARNING', :underline, :yellow]}: " \
+                      "The #{Paint['--remove', :bold]} option is deprecated. " \
+                      "The command #{Paint['remove-default', :bold]} should be used instead. " \
+                      "See #{Paint[Env::CLI::PROGRAM_NAME+' help remove-default', :bold]} for more information." \
                       "\n\n"
           RemoveDefault.new([],@options).run
         elsif @options.use_system
