@@ -4,3 +4,5 @@ tmp
 vendor
 etc/config.yml
 var
+*.idea*
+*.swp

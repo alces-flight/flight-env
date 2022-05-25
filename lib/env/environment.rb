@@ -65,19 +65,42 @@ module Env
       end
 
       def default
-        Config.user_data.fetch(:default_environment)
+        Config.user_data.fetch(:default_environment) || begin
+          unless Config.user_data.fetch(:system_default_opt_out)
+            Config.data.fetch(:default_environment)
+          end
+        end
       end
 
-      def remove_default
-        Config.user_data.delete(:default_environment)
-        Config.save_user_data
-      end
-
-      def set_default(env_name)
-        self[env_name].tap do |env|
-          Config.user_data.set(:default_environment, value: env.to_s)
+      def remove_default(system)
+        if system
+          Config.data.delete(:default_environment)
+          Config.save_data
+        else
+          Config.user_data.delete(:default_environment)
           Config.save_user_data
         end
+      end
+
+      def set_default(env_name, system)
+        self[env_name].tap do |env|
+          if system
+            if env.global?
+              Config.data.set(:default_environment, value: env.to_s)
+              Config.save_data
+            else
+              raise SystemEnvironmentError, "user environment #{env_name} cannot be set as the system default"
+            end
+          else
+            Config.user_data.set(:default_environment, value: env.to_s)
+            Config.save_user_data
+          end
+        end
+      end
+
+      def system_default_opt_out(optout)
+        Config.user_data.set(:system_default_opt_out, value: optout)
+        Config.save_user_data
       end
 
       def create(type, name: DEFAULT, global: false)
