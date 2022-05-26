@@ -31,7 +31,7 @@ module Env
     class ShowDefault < Command
       def run
         if d = Environment.default
-          puts d
+          puts pretty_name(d)
         elsif !@options.empty_if_unset
           puts "(none)"
         end

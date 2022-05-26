@@ -50,7 +50,7 @@ module Env
           end
           system = @options.system
           e = Environment.set_default(args[0], system)
-          puts "Default #{ system ? "system-wide " : "" }environment set to: #{e}"
+          puts "Default #{ system ? "system-wide " : "" }environment set to: #{pretty_name(e)}"
         end
       end
     end
