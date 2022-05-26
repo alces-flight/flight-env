@@ -32,7 +32,7 @@ module Env
     class ShowActive < Command
       def run
         if active_env = Environment.active
-          puts pretty_name(active_env)
+          puts STDOUT.tty? ? pretty_name(active_env) : active_env
         elsif !@options.empty_if_unset
           puts "(none)"
         end
