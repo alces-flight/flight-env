@@ -40,7 +40,7 @@ module Env
           Environment.system_default_opt_out(false)
           puts "Default login environment has been set to the system-wide default."
           if d = Environment.default
-            puts "Currently set to: #{d}"
+            puts "Currently set to: #{ STDOUT.tty? ? pretty_name(d) : d }"
           else
             puts "Currently, no system default is set."
           end
