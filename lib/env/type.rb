@@ -88,6 +88,7 @@ module Env
     attr_reader :url
     attr_reader :author
     attr_reader :arch
+    attr_reader :hidden
 
     def initialize(md, dir)
       @name = md[:name]
@@ -95,6 +96,7 @@ module Env
       @url = md[:url]
       @dir = dir
       @arch = md[:arch] || []
+      @hidden = md[:hidden] || false
     end
 
     def supports_host_arch?
