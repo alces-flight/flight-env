@@ -70,7 +70,7 @@ module Env
                 begin
                   md = YAML.load_file(File.join(d,'metadata.yml'))
                   t = Type.new(md, d)
-                  a[t.name.to_sym] = t if t.supports_host_arch?
+                  a[t.name.to_sym] = t if t.supports_host_arch? && !t.disabled
                 rescue
                   nil
                 end
@@ -88,7 +88,7 @@ module Env
     attr_reader :url
     attr_reader :author
     attr_reader :arch
-    attr_reader :hidden
+    attr_reader :disabled
 
     def initialize(md, dir)
       @name = md[:name]
@@ -96,7 +96,7 @@ module Env
       @url = md[:url]
       @dir = dir
       @arch = md[:arch] || []
-      @hidden = md[:hidden] || false
+      @disabled = md[:disabled] || false
     end
 
     def supports_host_arch?

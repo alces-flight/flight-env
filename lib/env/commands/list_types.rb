@@ -40,7 +40,6 @@ module Env
           Table.emit do |t|
             headers 'Name', 'Summary'
             Env::Type.each do |t|
-              next if t.hidden
               row Paint[t.name, :cyan], cmd.word_wrap("#{Paint[t.summary, :green]}\n > #{Paint[t.url, :blue, :bright, :underline]}\n ", line_width: TTY::Screen.width - 30)
             end
           end
