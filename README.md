@@ -15,7 +15,7 @@ managed with the ability to switch between them as required.
 Flight Environment is available as part of the *Flight User Suite*.  This is the
 easiest method for installing Flight Environment and all its dependencies.  It is
 documented in [the OpenFlight
-Documentation](https://use.openflighthpc.org/installing-user-suite/install.html#installing-flight-user-suite).
+Documentation](https://docs.openflighthpc.org/hpc_environment_usage/ecosystems/flight_environment/).
 
 ### Manual Installation
 
@@ -78,7 +78,7 @@ Remove an ecosystem using the `purge` command.
 See the `help` command for further details and information about other
 commands. Further information and examples of the `env` command are available
 in [the OpenFlight
-documentation](https://use.openflighthpc.org/en/latest/working-with-user-suite/flight-environment.html).
+documentation](https://docs.openflighthpc.org/hpc_environment_usage/ecosystems/flight_environment/).
 
 # Contributing
 
