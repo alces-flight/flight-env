@@ -7,11 +7,16 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
+    addressable (2.8.7)
+      public_suffix (>= 2.0.2, < 7.0)
     commander-openflighthpc (1.1.0)
       highline (~> 1.7.2)
       paint (~> 2.1.0)
     equatable (0.5.0)
     ffi (1.11.1)
+    git (1.19.1)
+      addressable (~> 2.8)
+      rchardet (~> 1.8)
     highline (1.7.10)
     hpricot (0.8.6)
     mustache (1.1.0)
@@ -20,6 +25,8 @@ GEM
     pastel (0.7.2)
       equatable (~> 0.5.0)
       tty-color (~> 0.4.0)
+    public_suffix (5.1.1)
+    rchardet (1.8.0)
     rdiscount (2.2.0.1)
     ronn (0.7.3)
       hpricot (>= 0.8.2)
@@ -64,6 +71,7 @@ PLATFORMS
 
 DEPENDENCIES
   commander-openflighthpc (~> 1.1.0)
+  git (~> 1.18)
   ronn
   sys-proctable
   tty-config
