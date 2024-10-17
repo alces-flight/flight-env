@@ -29,17 +29,28 @@ module Env
     class SetDefault < Command
       def run
         if @options.remove
-          if @args.any?
-            raise OptionParser::InvalidArgument, "do not specify environment when removing default"
+          msg = "#{Paint['WARNING', :underline, :yellow]}: " \
+            "The #{Paint['--remove', :bold]} option is deprecated. " \
+            "Use the #{Paint['remove-default', :bold]} command instead. " \
+            "See #{Paint[Env::CLI::PROGRAM_NAME+' help remove-default', :bold]} for more information."
+          $stderr.puts(word_wrap(msg, line_width: TTY::Screen.width))
+          RemoveDefault.new([],@options).run
+        elsif @options.use_system
+          Environment.remove_default(false)
+          Environment.system_default_opt_out(false)
+          puts "Default login environment has been set to the system-wide default."
+          if d = Environment.default
+            puts "Currently set to: #{ STDOUT.tty? ? pretty_name(d) : d }"
+          else
+            puts "Currently, no system default is set."
           end
-          Environment.remove_default
-          puts "Default environment removed"
         else
           if @args.empty?
             raise OptionParser::MissingArgument, "must specify environment when setting default"
           end
-          e = Environment.set_default(args[0])
-          puts "Default environment set to: #{e}"
+          system = @options.system
+          e = Environment.set_default(args[0], system)
+          puts "Default #{ system ? "system-wide " : "" }environment set to: #{ STDOUT.tty? ? pretty_name(e) : e }"
         end
       end
     end

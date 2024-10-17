@@ -1,5 +1,5 @@
 # =============================================================================
-# Copyright (C) 2019-present Alces Flight Ltd.
+# Copyright (C) 2022-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -24,18 +24,13 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-require 'env/command'
-require 'env/environment'
-
 module Env
   module Commands
-    class ShowActive < Command
+    class RemoveDefault < Command
       def run
-        if active_env = Environment.active
-          puts STDOUT.tty? ? pretty_name(active_env) : active_env
-        elsif !@options.empty_if_unset
-          puts "(none)"
-        end
+        Environment.remove_default(@options.system)
+        Environment.system_default_opt_out(true)
+        puts "#{ @options.system ? "System-wide d" : "D" }efault environment removed"
       end
     end
   end

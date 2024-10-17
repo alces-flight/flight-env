@@ -57,7 +57,7 @@ module Env
         end
         wr.puts(doc.to_roff)
         wr.close
-        Process.wait
+        Process.wait(pid)
       end
     end
   end

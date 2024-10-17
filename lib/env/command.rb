@@ -45,8 +45,16 @@ module Env
     end
 
     def pretty_name(env)
-      Paint[env.type.name, :cyan] +
-        '@' + Paint[env.name, :magenta]
+      env_type = (env.is_a? Environment) ? env.type.name : env.split('@')[0]
+      env_name = (env.is_a? Environment) ? env.name      : env.split('@')[1]
+      Paint[env_type, :cyan] +
+        '@' + Paint[env_name, :magenta]
+    end
+
+    def word_wrap(text, line_width: 80, break_sequence: "\n")
+      text.split("\n").collect! do |line|
+        line.length > line_width ? line.gsub(/(.{1,#{line_width}})(\s+|$)/, "\\1#{break_sequence}").strip : line
+      end * break_sequence
     end
   end
 end
