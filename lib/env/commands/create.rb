@@ -26,7 +26,6 @@
 # ==============================================================================
 require 'env/command'
 require 'env/environment'
-require 'env/type'
 
 module Env
   module Commands
@@ -35,12 +34,12 @@ module Env
         active_env = Environment.active
         if active_env.nil?
           Environment.global_only = true if @options.global
-          type, name = args[0].split('@')
+          name = args[0]
           opts = {}.tap do |h|
             h[:name] = name unless name.nil?
             h[:global] = true if @options.global
           end
-          Environment.create(Type[type], **opts)
+          Environment.create(**opts)
         else
           raise ActiveEnvironmentError, "unable to create with active environment: #{active_env}"
         end

@@ -1,5 +1,5 @@
 # =============================================================================
-# Copyright (C) 2019-present Alces Flight Ltd.
+# Copyright (C) 2024-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -24,40 +24,24 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-require 'env/command'
-require 'env/type'
-
-require 'ronn'
+require_relative '../command'
+require_relative '../plugin'
 
 module Env
   module Commands
-    class DescribeType < Command
+    class RemovePlugin < Command
       def run
-        arg_type = args[0]
-        type = Type[arg_type]
-        options = {
-          date: File.stat(type.info_file).ctime,
-          manual: 'OpenFlight Software Environments',
-          organization: type.author || 'Alces Flight Ltd',
-        }
-        doc = Ronn::Document.new(type.info_file, options) do |f|
-          File.read(f).tap do |s|
-            s.gsub!('%PROGRAM_NAME%', Env::CLI::PROGRAM_NAME)
-          end
+        target_env = Environment[args[1]]
+        active_env = Environment.active
+        if active_env == target_env
+          raise ActiveEnvironmentError, "unable to remove plugin from active environment: #{active_env}"
         end
-        pager = ENV['MANPAGER'] || ENV['PAGER'] || 'less -FRX'
-        groff = 'groff -Wall -mtty-char -mandoc -Tascii'
-        rd, wr = IO.pipe
-        if pid = fork
-          rd.close
+        plugin = target_env.plugins.find {|p| p.name == args[0]}
+        if plugin.nil?
+          raise UnknownEnvironmentPluginError, "plugin '#{args[0]}' is not installed in environemnt: #{args[1]}"
         else
-          wr.close
-          STDIN.reopen rd
-          exec "#{groff} | #{pager}"
+          plugin.remove(target_env)
         end
-        wr.puts(doc.to_roff)
-        wr.close
-        Process.wait(pid)
       end
     end
   end

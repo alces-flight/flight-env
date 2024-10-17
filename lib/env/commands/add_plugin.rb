@@ -1,5 +1,5 @@
 # =============================================================================
-# Copyright (C) 2020-present Alces Flight Ltd.
+# Copyright (C) 2024-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -24,17 +24,22 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-export flight_ENV_orig_PATH="$PATH"
-export flight_ENV_orig_PS1="$PS1"
+require_relative '../command'
+require_relative '../errors'
+require_relative '../plugin'
 
-export flight_ENV_active=example@<%= env_name %>
-export flight_ENV_scope=<%= env_global ? 'global' : 'user' %>
-export flight_ENV_dir=<%= env_root %>/example+<%= env_name %>
-
-if [[ $TERM == "xterm-256color" ]]; then
-  PS1="\[\033[48;5;25;1;38;5;189m\]<example<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '\[\033[1;38;5;219m\]{+}\[\033[1;38;5;189m\]' : '' %>>\[\033[0m\] $PS1"
-else
-  PS1="\[\033[1m\]<example<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '\[\033[7m\]{+}\[\033[0;1m\]' : '' %>>\[\033[0m\] $PS1"
-fi
-
-export EXAMPLE_SETTING=example
+module Env
+  module Commands
+    class AddPlugin < Command
+      def run
+        plugin = Plugin[args[0]]
+        target_env = Environment[args[1]]
+        active_env = Environment.active
+        if active_env == target_env
+          raise ActiveEnvironmentError, "unable to add plugin to active environment: #{active_env}"
+        end
+        plugin.add(target_env)
+      end
+    end
+  end
+end

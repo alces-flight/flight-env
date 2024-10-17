@@ -1,5 +1,5 @@
 # =============================================================================
-# Copyright (C) 2020-present Alces Flight Ltd.
+# Copyright (C) 2019-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -24,14 +24,25 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-flight_ENV_vars=(EXAMPLE_SETTING)
-for flight_ENV_iter in "${flight_ENV_vars[@]}"; do
-  unset $flight_ENV_iter
-done
-unset flight_ENV_iter flight_ENV_vars
+export flight_ENV_orig_PS1="$PS1"
 
-unset flight_ENV_active flight_ENV_scope flight_ENV_dir
-PS1="${flight_ENV_orig_PS1}"
-unset flight_ENV_orig_PS1
-PATH="${flight_ENV_orig_PATH}"
-unset flight_ENV_orig_PATH
+export flight_ENV_active=<%= env_name %>
+export flight_ENV_scope=<%= env_global ? 'global' : 'user' %>
+export flight_ENV_dir=<%= env_root %>/<%= env_name %>
+
+if [ -d "${flight_ENV_dir}"/env-meta/plugins ]; then
+  for a in "${flight_ENV_dir}"/env-meta/plugins/*/activate.bashrc; do
+    if [ -r "$a" ]; then
+      source $a
+    fi
+  done
+  unset a
+fi
+
+if [ "$flight_ENV_prompt" != "off" ]; then
+  if [[ $TERM == "xterm-256color" ]]; then
+    PS1="\[\033[48;5;25;1;38;5;189m\]<<%= env_name %><%= env_global ? '\[\033[1;38;5;219m\]{+}\[\033[1;38;5;189m\]' : '' %>>\[\033[0m\] $PS1"
+  else
+    PS1="\[\033[1m\]<<%= env_name %><%= env_global ? '\[\033[7m\]{+}\[\033[0;1m\]' : '' %>>\[\033[0m\] $PS1"
+  fi
+fi

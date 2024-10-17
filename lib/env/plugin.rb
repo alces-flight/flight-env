@@ -33,10 +33,10 @@ require 'fileutils'
 require 'yaml'
 require 'whirly'
 require_relative 'patches/unicode-display_width'
+require 'git'
 
 module Env
-  class Type
-    DEFAULT = 'default'
+  class Plugin
     FUNC_DELIMITER = begin
                        major, minor, patch =
                                      IO.popen("/bin/bash -c 'echo $BASH_VERSION'")
@@ -51,35 +51,59 @@ module Env
 
     class << self
       def each(&block)
-        all.values.each(&block)
+        all.each(&block)
       end
 
       def [](k)
-        all[k.to_sym].tap do |t|
+        if k.start_with?(':')
+          # git source
+          dest_path = File.join(Config.tmpdir, 'repo')
+          Git.clone(
+            'https://github.com/openflighthpc/flight-env-types',
+            dest_path,
+          )
+          name = k.split(':').last
+          name, version = name.split('=')
+          all_in_path(dest_path).find {|p| p.name == name && (version.nil? || p.version == version) }
+        elsif k.start_with?('/')
+          # path source
+          begin
+            md = YAML.load_file(File.join(k,'metadata.yml'))
+            t = Plugin.new(md, k)
+            t.supports_host_arch? ? t : nil
+          rescue
+            nil
+          end
+        else
+          name, version = k.split('=')
+          all.find {|p| p.name == name && (version.nil? || p.version == version) }
+        end.tap do |t|
           if t.nil?
-            raise UnknownEnvironmentTypeError, "unknown environment type: #{k}"
+            raise UnknownEnvironmentPluginError, "can't find environment plugin: #{k}"
           end
         end
       end
 
-      def all
-        @types ||= {}.tap do |h|
-          {}.tap do |a|
-            Config.type_paths.each do |p|
-              Dir[File.join(p,'*')].each do |d|
-                begin
-                  md = YAML.load_file(File.join(d,'metadata.yml'))
-                  t = Type.new(md, d)
-                  a[t.name.to_sym] = t if t.supports_host_arch? && !t.disabled
-                rescue
-                  nil
-                end
-              end
+      def all_in_path(p)
+        [].tap do |a|
+          Dir[File.join(p,'*')].each do |d|
+            begin
+              md = YAML.load_file(File.join(d,'metadata.yml'))
+              t = Plugin.new(md, d)
+              a << t if t.supports_host_arch? && !t.disabled
+            rescue
+              nil
             end
           end
-            .values.sort {|a,b| a.name <=> b.name}
-            .each {|t| h[t.name.to_sym] = t}
-        end
+        end.sort {|a,b| [a.name, a.version] <=> [b.name, b.version] }
+      end
+
+      def all
+        @plugins ||= [].tap do |a|
+          Config.plugin_paths.each do |p|
+            a.concat(all_in_path(p))
+          end
+        end.sort {|a,b| [a.name, a.version] <=> [b.name, b.version] }
       end
     end
 
@@ -89,6 +113,7 @@ module Env
     attr_reader :author
     attr_reader :arch
     attr_reader :disabled
+    attr_reader :version
 
     def initialize(md, dir)
       @name = md[:name]
@@ -97,6 +122,7 @@ module Env
       @dir = dir
       @arch = md[:arch] || []
       @disabled = md[:disabled] || false
+      @version = (md[:version] || 0).to_s
     end
 
     def supports_host_arch?
@@ -111,17 +137,18 @@ module Env
       @info_file ||= File.join(@dir, 'info.md')
     end
 
-    def create(name: DEFAULT, global: false)
-      puts "Creating environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]}"
-      if run_script(install_script(global), 'install', name, global)
-        puts "Environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]} has been created"
-        Environment.new(self, name, global)
+    def add(env)
+      puts "Adding plugin #{Paint[self.name, :cyan]} to environment #{Paint[env.name, :magenta]}"
+      if run_script(add_script, 'add', env)
+        FileUtils.mkdir(File.join(env.path,'env-meta','plugins'))
+        FileUtils.cp_r(@dir, File.join(env.path,'env-meta','plugins',self.name))
+        puts "Plugin #{Paint[self.name, :cyan]} has been added to the #{Paint[name, :magenta]} environment"
       else
         log_file = File.join(
-          build_cache_path(global),
-          "#{self.name}+#{name}.install.log"
+          build_cache_path(env.global?),
+          "#{self.name}+#{env.name}.add.log"
         )
-        raise EnvironmentOperationError, "Creation of environment #{self.name}@#{name} failed; see: #{log_file}"
+        raise EnvironmentOperationError, "Addition of #{self.name} plugin to #{name} environment failed; see: #{log_file}"
       end
     rescue
       old_stderr, old_stdout = $stderr, $stdout
@@ -129,60 +156,28 @@ module Env
       raise
     end
 
-    def purge(name: DEFAULT, global: false)
-      puts "Purging environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]}"
-      if run_script(purge_script(global), 'purge', name, global)
-        puts "Environment #{Paint[self.name, :cyan]}@#{Paint[name, :magenta]} has been purged"
+    def remove(env)
+      puts "Removing plugin #{Paint[self.name, :cyan]} from environment #{Paint[env.name, :magenta]}"
+      plugin_path = File.join(env.path,'env-meta','plugins',self.name)
+      if run_script(File.join(plugin_path,'remove.sh'), 'remove', env)
+        FileUtils.rm_r(plugin_path, secure: true)
+        puts "Plugin #{Paint[self.name, :cyan]} has been removed from the #{Paint[name, :magenta]} environment"
       else
         log_file = File.join(
-          build_cache_path(global),
-          "#{self.name}+#{name}.purge.log"
+          build_cache_path(env.global?),
+          "#{self.name}+#{env.name}.remove.log"
         )
-        raise EnvironmentOperationError, "Purge of environment #{self.name}@#{name} failed; see: #{log_file}"
+        raise EnvironmentOperationError, "Removal of #{self.name} plugin from #{name} environment failed; see: #{log_file}"
       end
-    end
-
-    def activator(name = DEFAULT, global = false)
-      tmpl = ERB.new(File.read(eval_template('activate')))
-      tmpl.result(render_binding(name, global))
-    end
-
-    def deactivator(name = DEFAULT, global = false)
-      tmpl = ERB.new(File.read(eval_template('deactivate')))
-      tmpl.result(render_binding(name, global))
     end
 
     private
-    def render_binding(name, global = false)
-      render_ctx = Module.new.class.tap do |eigen|
-        eigen.define_method(:env_root) { global ? Config.global_depot_path : Config.user_depot_path }
-        eigen.define_method(:env_cache) { global ? Config.global_cache_path : Config.user_cache_path }
-        eigen.define_method(:env_name) { name }
-        eigen.define_method(:env_global) { global }
-      end
-      render_ctx.instance_exec { binding }
-    end
-
-    def eval_template(phase)
-      shell = Shell.type
-      File.join(@dir, "#{phase}.#{shell.name}.erb").tap do |f|
-        if ! File.exists?(f)
-          phase_name = phase == 'activate' ? 'activator' : 'deactivator'
-          raise EvaluatorError, "no #{phase_name} found for current shell: #{shell.name}"
-        end
-      end
-    end
-
     def depot_path(global)
       global ? Config.global_depot_path : Config.user_depot_path
     end
 
-    def purge_script(global)
-      File.join(@dir, "#{global ? 'global' : 'user'}-purge.sh")
-    end
-
-    def install_script(global)
-      File.join(@dir, "#{global ? 'global' : 'user'}-install.sh")
+    def add_script
+      File.join(@dir, "add.sh")
     end
 
     def build_cache_path(global)
@@ -262,8 +257,9 @@ EOF
 #      h['BASH_FUNC_env_echo()'] = "() { flight_env_comms DATA \"$@\"\necho \"$@\"\n}"
     end
 
-    def run_script(script, action, name, global)
+    def run_script(script, action, env)
       if File.exists?(script)
+        global = env.global?
         FileUtils.mkdir_p(build_cache_path(global)) rescue nil
         FileUtils.mkdir_p(depot_path(global)) rescue nil
         if File.writable?(depot_path(global)) && File.writable?(build_cache_path(global))
@@ -273,7 +269,7 @@ EOF
               setup_bash_funcs(ENV, wr.fileno)
               log_file = File.join(
                 build_cache_path(global),
-                "#{self.name}+#{name}.#{action}.log"
+                "#{self.name}+#{env.name}.#{action}.log"
               )
               FileUtils.mkdir_p(build_cache_path(global))
               exec(
@@ -285,17 +281,17 @@ EOF
                 '/bin/bash',
                 '-x',
                 script,
-                name,
+                env.name,
                 close_others: false,
                 [:out, :err] => [log_file ,'w']
               )
             end
           end
         else
-          raise EnvironmentOperationError, "unable to #{action == 'install' ? 'create' : action} #{global ? 'global ' : ''}environment #{self.name}@#{name} - permission denied"
+          raise EnvironmentOperationError, "unable to #{action} plugin to environment #{env.name} - permission denied"
         end
       else
-        raise IncompleteTypeError, "no #{global ? 'global ' : ''}#{action} script provided for type: #{self.name}"
+        raise IncompletePluginError, "no #{action} script provided for plugin: #{self.name}"
       end
     end
 

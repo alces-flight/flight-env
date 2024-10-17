@@ -1,4 +1,3 @@
-# coding: utf-8
 # =============================================================================
 # Copyright (C) 2019-present Alces Flight Ltd.
 #
@@ -25,26 +24,16 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-require 'env/command'
-require 'env/table'
-require 'env/type'
-
-module Env
-  module Commands
-    class ListTypes < Command
-      def run
-        if Type.all.empty?
-          puts "No environment types found."
-        else
-          cmd = self
-          Table.emit do |t|
-            headers 'Name', 'Summary'
-            Env::Type.each do |t|
-              row Paint[t.name, :cyan], cmd.word_wrap("#{Paint[t.summary, :green]}\n > #{Paint[t.url, :blue, :bright, :underline]}\n ", line_width: TTY::Screen.width - 30)
-            end
-          end
-        end
-      end
-    end
+if ( -d $flight_ENV_dir/env-meta/plugins ) then
+  set nonomatch
+  foreach i ( $flight_ENV_dir/env-meta/plugins/*/deactivate.tcshrc )
+    if ( -r "$i" ) then
+      source "$i"
+    endif
   end
-end
+  unset i nonomatch
+endif
+
+unsetenv flight_ENV_active flight_ENV_scope flight_ENV_dir
+set prompt="${flight_ENV_orig_prompt}"
+unset flight_ENV_orig_prompt

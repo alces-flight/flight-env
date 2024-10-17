@@ -1,6 +1,6 @@
-#!/bin/bash
+# coding: utf-8
 # =============================================================================
-# Copyright (C) 2020-present Alces Flight Ltd.
+# Copyright (C) 2019-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -25,26 +25,26 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-set -e
+require_relative '../command'
+require_relative '../table'
+require_relative '../plugin'
 
-flight_ENV_ROOT=${flight_ENV_ROOT:-${flight_ROOT}/var/lib/env}
-flight_ENV_CACHE=${flight_ENV_CACHE:-${flight_ROOT}/var/cache/env}
-flight_ENV_BUILD_CACHE=${flight_ENV_BUILD_CACHE:-${flight_ROOT}/var/cache/env/build}
-name=$1
-
-if [ -z "$name" ]; then
-  echo "error: environment name not supplied"
-  exit 1
-fi
-
-# create directory structure
-mkdir -p ${flight_ENV_CACHE} ${flight_ENV_BUILD_CACHE} ${flight_ENV_ROOT}
-cd ${flight_ENV_BUILD_CACHE}
-
-env_stage "Verifying prerequisites"
-
-env_stage "Creating environment (example@${name})"
-mkdir -p ${flight_ENV_ROOT}/example+${name}
-cat <<EOF > ${flight_ENV_ROOT}/example+${name}/example.txt
-This is an example ecosystem definition for Flight Environment.
-EOF
+module Env
+  module Commands
+    class ListPlugins < Command
+      def run
+        if Plugin.all.empty?
+          puts "No environment plugins found."
+        else
+          cmd = self
+          Table.emit do |t|
+            headers 'Name', 'Summary'
+            Env::Plugin.each do |t|
+              row Paint[t.name, :cyan], cmd.word_wrap("#{Paint[t.summary, :green]}\n > #{Paint[t.url, :blue, :bright, :underline]}\n ", line_width: TTY::Screen.width - 30)
+            end
+          end
+        end
+      end
+    end
+  end
+end

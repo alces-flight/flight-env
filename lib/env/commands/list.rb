@@ -1,5 +1,6 @@
+# coding: utf-8
 # =============================================================================
-# Copyright (C) 2020-present Alces Flight Ltd.
+# Copyright (C) 2024-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -24,13 +25,38 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-foreach evar (EXAMPLE_SETTING)
-  unsetenv $evar
-end
-unset evar
+require 'env/command'
+require 'env/environment'
+require 'env/table'
 
-unsetenv flight_ENV_active flight_ENV_scope flight_ENV_dir
-set prompt="${flight_ENV_orig_prompt}"
-unset flight_ENV_orig_prompt
-setenv PATH "${flight_ENV_orig_PATH}"
-unset flight_ENV_orig_PATH
+module Env
+  module Commands
+    class List < Command
+      def run
+        target_env = if args[0].nil?
+                       Environment.active.tap do |active_env|
+                         if active_env.nil?
+                           raise ActiveEnvironmentError, "no active environment"
+                         end
+                       end
+                     else
+                       Environment[args[0]]
+                     end
+        if target_env
+          plugins = target_env.plugins
+          if plugins.empty?
+            puts "No plugins have been added to this environment."
+          else
+            cmd = self
+            Table.emit do |t|
+              headers 'Name', 'Version'
+              plugins.each do |t|
+                row Paint[t.name, :cyan], Paint[t.version, :magenta]
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+end

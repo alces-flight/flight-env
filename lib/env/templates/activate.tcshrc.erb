@@ -1,5 +1,5 @@
 # =============================================================================
-# Copyright (C) 2020-present Alces Flight Ltd.
+# Copyright (C) 2019-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -24,18 +24,31 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-set flight_ENV_orig_PATH = "$PATH"
 set flight_ENV_orig_prompt = "$prompt"
 
-setenv flight_ENV_active "example@<%= env_name %>"
-setenv flight_ENV_scope "<%= env_global ? 'global' : 'user' %>"
-setenv flight_ENV_dir "<%= env_root %>/example+<%= env_name %>"
+setenv flight_ENV_active <%= env_name %>
+setenv flight_ENV_scope <%= env_global ? 'global' : 'user' %>
+setenv flight_ENV_dir <%= env_root %>/<%= env_name %>
 
-set bold='%{\033[1m%}'
-set reverse='%{\033[7m%}'
-set reset='%{\033[0;1m%}'
-set clr='%{\033[0m%}'
-set prompt="$bold<example<%= env_name == 'default' ? '' : "@#{env_name}" %><%= env_global ? '$reverse{+}$reset' : '' %>>$clr $prompt"
-unset bold reverse reset clr
+if ( -d $flight_ENV_dir/env-meta/plugins ) then
+  set nonomatch
+  foreach i ( $flight_ENV_dir/env-meta/plugins/*/activate.tcshrc )
+    if ( -r "$i" ) then
+      source "$i"
+    endif
+  end
+  unset i nonomatch
+endif
 
-setenv EXAMPLE_SETTING "example"
+if ( ! $?flight_ENV_prompt ) then
+  set flight_ENV_prompt
+endif
+
+if ( $flight_ENV_prompt != "off" ) then
+  set bold='%{\033[1m%}'
+  set reverse='%{\033[7m%}'
+  set reset='%{\033[0;1m%}'
+  set clr='%{\033[0m%}'
+  set prompt="$bold<<%= env_name %><%= env_global ? '$reverse{+}$reset' : '' %>>$clr $prompt"
+  unset bold reverse reset clr
+endif

@@ -1,6 +1,5 @@
-#!/bin/bash
 # =============================================================================
-# Copyright (C) 2020-present Alces Flight Ltd.
+# Copyright (C) 2019-present Alces Flight Ltd.
 #
 # This file is part of Flight Environment.
 #
@@ -25,26 +24,41 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
-set -e
+require_relative '../command'
+require_relative '../plugin'
 
-flight_ENV_ROOT=${flight_ENV_ROOT:-$HOME/.local/share/flight/env}
-flight_ENV_CACHE=${flight_ENV_CACHE:-$HOME/.cache/flight/env}
-flight_ENV_BUILD_CACHE=${flight_ENV_BUILD_CACHE:-$HOME/.cache/flight/env/build}
-name=$1
+require 'ronn'
 
-if [ -z "$name" ]; then
-  echo "error: environment name not supplied"
-  exit 1
-fi
-
-# create directory structure
-mkdir -p ${flight_ENV_CACHE} ${flight_ENV_BUILD_CACHE} ${flight_ENV_ROOT}
-cd ${flight_ENV_BUILD_CACHE}
-
-env_stage "Verifying prerequisites"
-
-env_stage "Creating environment (example@${name})"
-mkdir -p ${flight_ENV_ROOT}/example+${name}
-cat <<EOF > ${flight_ENV_ROOT}/example+${name}/example.txt
-This is an example ecosystem definition for Flight Environment.
-EOF
+module Env
+  module Commands
+    class DescribePlugin < Command
+      def run
+        arg_plugin = args[0]
+        plugin = Plugin[arg_plugin]
+        options = {
+          date: File.stat(plugin.info_file).ctime,
+          manual: 'OpenFlight Software Environments',
+          organization: plugin.author || 'Alces Flight Ltd',
+        }
+        doc = Ronn::Document.new(plugin.info_file, options) do |f|
+          File.read(f).tap do |s|
+            s.gsub!('%PROGRAM_NAME%', Env::CLI::PROGRAM_NAME)
+          end
+        end
+        pager = ENV['MANPAGER'] || ENV['PAGER'] || 'less -FRX'
+        groff = 'groff -Wall -mtty-char -mandoc -Tascii'
+        rd, wr = IO.pipe
+        if pid = fork
+          rd.close
+        else
+          wr.close
+          STDIN.reopen rd
+          exec "#{groff} | #{pager}"
+        end
+        wr.puts(doc.to_roff)
+        wr.close
+        Process.wait(pid)
+      end
+    end
+  end
+end

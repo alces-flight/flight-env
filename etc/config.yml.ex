@@ -1,7 +1,7 @@
 ---
 # Directories containing env type definitions
-#type_paths:
-#  - etc/types
+#plugin_paths:
+#  - etc/plugins
 # Path to global/system-wide depots
 #global_depot_path: var/lib/env
 # Path to global/system-wide build cache

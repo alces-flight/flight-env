@@ -26,7 +26,6 @@
 # ==============================================================================
 require 'env/command'
 require 'env/environment'
-require 'env/type'
 require 'tty/prompt'
 
 module Env

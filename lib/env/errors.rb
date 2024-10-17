@@ -25,13 +25,13 @@
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
 module Env
-  UnknownEnvironmentTypeError = Class.new(RuntimeError)
+  UnknownEnvironmentPluginError = Class.new(RuntimeError)
   EnvironmentExistsError = Class.new(RuntimeError)
   NoSuchEnvironmentError = Class.new(RuntimeError)
   EvaluatorError = Class.new(RuntimeError)
   ActiveEnvironmentError = Class.new(RuntimeError)
   SystemEnvironmentError = Class.new(RuntimeError)
-  IncompleteTypeError = Class.new(RuntimeError)
+  IncompletePluginError = Class.new(RuntimeError)
   EnvironmentOperationError = Class.new(RuntimeError)
   InterruptedOperationError = Class.new(RuntimeError)
 end

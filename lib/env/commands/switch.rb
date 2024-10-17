@@ -27,7 +27,6 @@
 require 'env/command'
 require 'env/environment'
 require 'env/errors'
-require 'env/type'
 
 module Env
   module Commands

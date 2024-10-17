@@ -38,6 +38,8 @@ module Env
     # this wrapper is here to later enable error handling &/ logging
     def run!
       run
+    ensure
+      Config.clean_tmpdir
     end
 
     def run
@@ -45,10 +47,7 @@ module Env
     end
 
     def pretty_name(env)
-      env_type = (env.is_a? Environment) ? env.type.name : env.split('@')[0]
-      env_name = (env.is_a? Environment) ? env.name      : env.split('@')[1]
-      Paint[env_type, :cyan] +
-        '@' + Paint[env_name, :magenta]
+      Paint[env.name, :magenta]
     end
 
     def word_wrap(text, line_width: 80, break_sequence: "\n")

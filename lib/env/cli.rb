@@ -68,10 +68,10 @@ module Env
     end
 
     command :activate do |c|
-      cli_syntax(c, 'TYPE[@NAME]')
+      cli_syntax(c, 'NAME')
       c.description = 'Activate an application environment'
       c.action Commands, :activate
-      c.option '-s', '--subshell', 'Open an interactive subshell with TYPE environment activated.'
+      c.option '-s', '--subshell', 'Open an interactive subshell with NAME environment activated.'
       c.option '-g', '--global', 'Consider global application environments only.'
     end
 
@@ -82,7 +82,7 @@ module Env
     end
 
     command :switch do |c|
-      cli_syntax(c, 'TYPE[@NAME]')
+      cli_syntax(c, 'NAME')
       c.description = 'Switch to a different application environment'
       c.option '-g', '--global', 'Consider global application environments only.'
       c.action Commands, :switch
@@ -90,26 +90,44 @@ module Env
 
     command :avail do |c|
       cli_syntax(c)
-      c.description = "Show available application environment types"
-      c.action Commands, :list_types
-    end
-
-    command :list do |c|
-      cli_syntax(c)
       c.description = "List configured application environments"
       c.option '-g', '--global', 'Consider global application environments only.'
       c.action Commands, :list_envs
     end
 
+    command :add do |c|
+      cli_syntax(c, 'PLUGIN NAME')
+      c.description = "Add an application environment PLUGIN to environment NAME"
+      c.action Commands, :add_plugin
+    end
+
+    command :remove do |c|
+      cli_syntax(c, 'PLUGIN NAME')
+      c.description = "Remove an application environment PLUGIN from environment NAME"
+      c.action Commands, :remove_plugin
+    end
+
+    command :plugins do |c|
+      cli_syntax(c)
+      c.description = "Show available application environment plugins"
+      c.action Commands, :list_plugins
+    end
+
+    command :list do |c|
+      cli_syntax(c, '[NAME]')
+      c.description = "Show installed application environment plugins"
+      c.action Commands, :list
+    end
+
     command :create do |c|
-      cli_syntax(c, 'TYPE[@NAME]')
+      cli_syntax(c, 'NAME')
       c.description = "Create a new application environment"
       c.option '-g', '--global', 'Create a global application environment.'
       c.action Commands, :create
     end
 
     command :purge do |c|
-      cli_syntax(c, 'TYPE[@NAME]')
+      cli_syntax(c, 'NAME')
       c.description = "Purge an existing application environment"
       c.option '-g', '--global', 'Consider global application environments only.'
       c.option '--yes', 'Purge without prompting (DANGEROUS)'
@@ -124,8 +142,8 @@ module Env
 
     command :info do |c|
       cli_syntax(c, 'NAME')
-      c.description = "Show information about an application environment type"
-      c.action Commands, :describe_type
+      c.description = "Show information about an application environment plugin"
+      c.action Commands, :describe_plugin
     end
 
     command :'show-active' do |c|

@@ -122,14 +122,23 @@ module Env
         @root ||= File.expand_path(File.join(__dir__, '..', '..'))
       end
 
-      def type_paths
-        @type_paths ||=
+      def plugin_paths
+        @plugin_paths ||=
           data.fetch(
-            :type_paths,
+            :plugin_paths,
             default: [
-              'etc/types'
+              'etc/plugins'
             ]
           ).map {|p| File.expand_path(p, Config.root)}
+      end
+
+      def tmpdir
+        @tmpdir ||= Dir.mktmpdir('flight-env')
+      end
+
+      def clean_tmpdir
+        return if @tmpdir.nil?
+        FileUtils.rm_r(@tmpdir, secure: true)
       end
 
       private

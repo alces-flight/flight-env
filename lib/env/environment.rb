@@ -30,6 +30,13 @@ module Env
   class Environment
     DEFAULT = 'default'
 
+    ACTUATOR_TEMPLATES = {
+      'activate.bashrc' => File.read(File.join(__dir__, 'templates', 'activate.bashrc.erb')),
+      'activate.tcshrc' => File.read(File.join(__dir__, 'templates', 'activate.tcshrc.erb')),
+      'deactivate.bashrc' => File.read(File.join(__dir__, 'templates', 'deactivate.bashrc.erb')),
+      'deactivate.tcshrc' => File.read(File.join(__dir__, 'templates', 'deactivate.tcshrc.erb')),
+    }
+
     class << self
       def global_only=(val)
         @global_only = val
@@ -103,18 +110,14 @@ module Env
         Config.save_user_data
       end
 
-      def create(type, name: DEFAULT, global: false)
-        # if unknown type, error
-        if type.nil?
-          raise UnknownEnvironmentTypeError, "unknown environment type"
-        end
-        env_name = [type.name,name].join('@')
+      def create(name: DEFAULT, global: false)
         # if exists, error
-        if (self[env_name] rescue nil)
-          raise EnvironmentExistsError, "environment already exists: #{env_name}"
+        if (self[name] rescue nil)
+          raise EnvironmentExistsError, "environment already exists: #{name}"
         end
 
-        env = type.create(name: name, global: global)
+        path = File.join(depot_path(global), name)
+        Environment.new(name, path, global).init
       end
 
       def all
@@ -141,45 +144,125 @@ module Env
       def envs_for(path, global)
         [].tap do |a|
           Dir[File.join(path,'*')].sort.each do |d|
-            dir_name = File.basename(d)
-            next unless File.directory?(d) && dir_name.match?(/.*\+.*/)
-            type, name = dir_name.split('+')
-            begin
-              a << Environment.new(Type[type], name, global)
-            rescue
-              nil
-            end
+            next unless File.directory?(d) && File.directory?(File.join(d,'env-meta'))
+            name = File.basename(d)
+            a << Environment.new(name, d, global)
           end
         end
       end
+
+      private
+      def depot_path(global)
+        global ? Config.global_depot_path : Config.user_depot_path
+      end
     end
 
-    attr_accessor :name, :type, :global
+    attr_accessor :name, :global, :path
 
-    def initialize(type, name, global = false)
-      @type = type
+    def initialize(name, path, global = false)
       @name = name
+      @path = path
       @global = global
     end
 
     def to_s
-      [@type.name, @name].join("@")
+      @name
     end
 
+    def plugins
+      @plugins ||= [].tap do |a|
+        Dir[File.join(@path, 'env-meta', 'plugins', '*')].each do |d|
+          begin
+            md = YAML.load_file(File.join(d,'metadata.yml'))
+            a << Plugin.new(md, d)
+          rescue
+            nil
+          end
+        end
+      end
+    end
+    
     def global?
       self.global
     end
 
     def activator
-      type.activator(name, global)
+      File.read(template_for('activate'))
+    rescue EvaluatorError
+      ""
     end
 
     def deactivator
-      type.deactivator(name, global)
+      File.read(template_for('deactivate'))
+    rescue EvaluatorError
+      ""
     end
 
+    def init
+      if File.directory?(File.join(@path, 'env-meta'))
+        raise EnvironmentOperationError, "Environment at #{@path} already initialized."
+      end
+      stage "Initializing environment tree (#{name})" do
+        FileUtils.mkdir_p(File.join(path, 'env-meta'))
+        initialize_actuators
+      end
+    end        
+    
     def purge
-      type.purge(name: name, global: global?)
+      if !File.directory?(File.join(@path, 'env-meta'))
+        raise EnvironmentOperationError, "Environment at #{@path} is not initialized."
+      end
+      stage "Deleting environment tree (#{name})" do
+        FileUtils.rm_r(@path, secure: true)
+      end
+    end
+
+    private
+    def template_for(phase)
+      shell = Shell.type
+      File.join(@path, 'env-meta', "#{phase}.#{shell.name}rc").tap do |f|
+        if ! File.exists?(f)
+          phase_name = phase == 'activate' ? 'activator' : 'deactivator'
+          raise EvaluatorError, "no #{phase_name} found for current shell: #{shell.name}"
+        end
+      end
+    end
+
+    def stage(title, &block)
+      print "   > "
+      Whirly.start(
+        spinner: 'star',
+        remove_after_stop: true,
+        append_newline: false,
+        status: Paint[title, '#2794d8']
+      )
+      success = true
+      begin
+        block.call
+      rescue
+        success = false
+        raise
+      ensure
+        Whirly.stop
+        puts "#{success ? "\u2705" : "\u274c"} #{Paint[title, '#2794d8']}"
+      end
+    end
+
+    def initialize_actuators
+      ACTUATOR_TEMPLATES.each do |k,v|
+        tmpl = ERB.new(v)
+        File.write(File.join(path, 'env-meta', k), tmpl.result(render_binding(name, global)))
+      end        
+    end
+
+    def render_binding(name, global = false)
+      render_ctx = Module.new.class.tap do |eigen|
+        eigen.define_method(:env_root) { global ? Config.global_depot_path : Config.user_depot_path }
+        eigen.define_method(:env_cache) { global ? Config.global_cache_path : Config.user_cache_path }
+        eigen.define_method(:env_name) { name }
+        eigen.define_method(:env_global) { global }
+      end
+      render_ctx.instance_exec { binding }
     end
   end
 end

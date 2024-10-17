@@ -49,7 +49,7 @@ module Env
           end
         else
           Environment.each do |e|
-            puts "#{e.type.name}@#{e.name}\t#{e.global? ? 'global' : 'user'}"
+            puts "#{e.name}\t#{e.global? ? 'global' : 'user'}"
           end
         end
       end
