@@ -142,13 +142,13 @@ module Env
       if run_script(add_script, 'add', env)
         FileUtils.mkdir(File.join(env.path,'env-meta','plugins'))
         FileUtils.cp_r(@dir, File.join(env.path,'env-meta','plugins',self.name))
-        puts "Plugin #{Paint[self.name, :cyan]} has been added to the #{Paint[name, :magenta]} environment"
+        puts "Plugin #{Paint[self.name, :cyan]} has been added to the #{Paint[env.name, :magenta]} environment"
       else
         log_file = File.join(
           build_cache_path(env.global?),
           "#{self.name}+#{env.name}.add.log"
         )
-        raise EnvironmentOperationError, "Addition of #{self.name} plugin to #{name} environment failed; see: #{log_file}"
+        raise EnvironmentOperationError, "Addition of #{self.name} plugin to #{env.name} environment failed; see: #{log_file}"
       end
     rescue
       old_stderr, old_stdout = $stderr, $stdout
@@ -161,13 +161,13 @@ module Env
       plugin_path = File.join(env.path,'env-meta','plugins',self.name)
       if run_script(File.join(plugin_path,'remove.sh'), 'remove', env)
         FileUtils.rm_r(plugin_path, secure: true)
-        puts "Plugin #{Paint[self.name, :cyan]} has been removed from the #{Paint[name, :magenta]} environment"
+        puts "Plugin #{Paint[self.name, :cyan]} has been removed from the #{Paint[env.name, :magenta]} environment"
       else
         log_file = File.join(
           build_cache_path(env.global?),
           "#{self.name}+#{env.name}.remove.log"
         )
-        raise EnvironmentOperationError, "Removal of #{self.name} plugin from #{name} environment failed; see: #{log_file}"
+        raise EnvironmentOperationError, "Removal of #{self.name} plugin from #{env.name} environment failed; see: #{log_file}"
       end
     end
 

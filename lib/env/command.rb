@@ -47,7 +47,7 @@ module Env
     end
 
     def pretty_name(env)
-      Paint[env.name, :magenta]
+      Paint[env.name, :cyan]
     end
 
     def word_wrap(text, line_width: 80, break_sequence: "\n")
