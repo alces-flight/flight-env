@@ -37,7 +37,10 @@ module Env
         active_env = Environment.active
         if active_env == target_env
           raise ActiveEnvironmentError, "unable to add plugin to active environment: #{active_env}"
+        elsif target_env.plugins.include?(plugin)
+          raise EnvironmentOperationError, "plugin '#{args[0]}' already installed in environment: #{target_env}"
         end
+        target_env.assert_compatible!(plugin)
         plugin.add(target_env)
       end
     end

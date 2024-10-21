@@ -132,6 +132,13 @@ module Env
           ).map {|p| File.expand_path(p, Config.root)}
       end
 
+      def plugin_repo
+        data.fetch(
+          :plugin_repo,
+          default: 'https://github.com/openflighthpc/flight-env-types'
+        )
+      end
+
       def tmpdir
         @tmpdir ||= Dir.mktmpdir('flight-env')
       end

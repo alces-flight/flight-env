@@ -181,19 +181,21 @@ module Env
         end
       end
     end
-    
+
     def global?
       self.global
     end
 
     def activator
       File.read(template_for('activate'))
+        .gsub('%ENV_ROOT%', global? ? Config.global_depot_path : Config.user_depot_path)
     rescue EvaluatorError
       ""
     end
 
     def deactivator
       File.read(template_for('deactivate'))
+        .gsub('%ENV_ROOT%', global? ? Config.global_depot_path : Config.user_depot_path)
     rescue EvaluatorError
       ""
     end
@@ -206,14 +208,22 @@ module Env
         FileUtils.mkdir_p(File.join(path, 'env-meta'))
         initialize_actuators
       end
-    end        
-    
+    end
+
     def purge
       if !File.directory?(File.join(@path, 'env-meta'))
         raise EnvironmentOperationError, "Environment at #{@path} is not initialized."
       end
       stage "Deleting environment tree (#{name})" do
         FileUtils.rm_r(@path, secure: true)
+      end
+    end
+
+    def assert_compatible!(plugin)
+      plugins.each do |p|
+        if p.conflicts_with?(plugin) || plugin.conflicts_with?(p)
+          raise EnvironmentOperationError, "Plugin '#{plugin.name}' conflicts with existing plugin '#{p.name}' in environment: #{name}"
+        end
       end
     end
 

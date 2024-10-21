@@ -59,7 +59,7 @@ module Env
           # git source
           dest_path = File.join(Config.tmpdir, 'repo')
           Git.clone(
-            'https://github.com/openflighthpc/flight-env-types',
+            Config.plugin_repo,
             dest_path,
           )
           name = k.split(':').last
@@ -114,6 +114,7 @@ module Env
     attr_reader :arch
     attr_reader :disabled
     attr_reader :version
+    attr_reader :conflicts
 
     def initialize(md, dir)
       @name = md[:name]
@@ -123,6 +124,7 @@ module Env
       @arch = md[:arch] || []
       @disabled = md[:disabled] || false
       @version = (md[:version] || 0).to_s
+      @conflicts = md[:conflicts] || []
     end
 
     def supports_host_arch?
@@ -169,6 +171,10 @@ module Env
         )
         raise EnvironmentOperationError, "Removal of #{self.name} plugin from #{env.name} environment failed; see: #{log_file}"
       end
+    end
+
+    def conflicts_with?(plugin)
+      conflicts.include?(plugin.name)
     end
 
     private
