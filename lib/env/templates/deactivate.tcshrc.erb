@@ -24,6 +24,8 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
+set flight_ENV_ROOT "%ENV_ROOT%"
+
 if ( -d $flight_ENV_dir/env-meta/plugins ) then
   set nonomatch
   foreach i ( $flight_ENV_dir/env-meta/plugins/*/deactivate.tcshrc )
@@ -33,6 +35,7 @@ if ( -d $flight_ENV_dir/env-meta/plugins ) then
   end
   unset i nonomatch
 endif
+unset flight_ENV_ROOT
 
 unsetenv flight_ENV_active flight_ENV_scope flight_ENV_dir
 set prompt="${flight_ENV_orig_prompt}"

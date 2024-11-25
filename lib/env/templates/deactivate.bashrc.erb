@@ -24,6 +24,8 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
+export flight_ENV_ROOT="%ENV_ROOT%"
+
 if [ -d "${flight_ENV_dir}"/env-meta/plugins ]; then
   for a in "${flight_ENV_dir}"/env-meta/plugins/*/deactivate.bashrc; do
     if [ -r "$a" ]; then
@@ -32,6 +34,7 @@ if [ -d "${flight_ENV_dir}"/env-meta/plugins ]; then
   done
   unset a
 fi
+unset flight_ENV_ROOT
 
 unset flight_ENV_active flight_ENV_scope flight_ENV_dir
 PS1="${flight_ENV_orig_PS1}"

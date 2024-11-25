@@ -24,6 +24,7 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
+set flight_ENV_ROOT "%ENV_ROOT%"
 set flight_ENV_orig_prompt = "$prompt"
 
 setenv flight_ENV_active <%= env_name %>
@@ -39,6 +40,7 @@ if ( -d $flight_ENV_dir/env-meta/plugins ) then
   end
   unset i nonomatch
 endif
+unset flight_ENV_ROOT
 
 if ( ! $?flight_ENV_prompt ) then
   set flight_ENV_prompt

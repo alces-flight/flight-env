@@ -24,6 +24,8 @@
 # For more information on Flight Environment, please visit:
 # https://github.com/openflighthpc/flight-env
 # ==============================================================================
+export flight_ENV_ROOT="%ENV_ROOT%"
+
 export flight_ENV_orig_PS1="$PS1"
 
 export flight_ENV_active=<%= env_name %>
@@ -38,6 +40,7 @@ if [ -d "${flight_ENV_dir}"/env-meta/plugins ]; then
   done
   unset a
 fi
+unset flight_ENV_ROOT
 
 if [ "$flight_ENV_prompt" != "off" ]; then
   if [[ $TERM == "xterm-256color" ]]; then
