@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/bkuhlmann/xdg
-  revision: 7326f38151b151cdf36aaff25c987a34c2604d03
+  revision: dfe4d153d962be7f95022b7da9d14ffe3b04af5d
   specs:
     xdg (3.0.0)
 
